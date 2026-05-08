@@ -3,11 +3,13 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "rootDir": ".",
     "outDir": "dist-electron",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["electron"]
+  "include": ["electron"],
+  "exclude": ["electron/**/__tests__/**"]
 }

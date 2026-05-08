@@ -1,4 +1,4 @@
-import type { ProjectDocument } from "./schema";
+import type { ProjectDocument } from "./schema.js";
 
 export function createSeedProject(): ProjectDocument {
   const now = new Date().toISOString();
