@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSeedProject } from "../../src/lib/seedProject.js";
+import type { Persona } from "../../src/lib/schema.js";
 import { openProjectRepository } from "../projectRepository.js";
 
 let tempDirs: string[] = [];
@@ -17,6 +18,19 @@ function tempProjectDir() {
   tempDirs.push(dir);
   return dir;
 }
+
+const testPersona: Persona = {
+  id: "persona-ruth",
+  name: "Ruth",
+  role: "Dialogue Punch-Up Writer",
+  specialty: "grounded awkward comedy",
+  tone: "blunt, practical, dry",
+  avatarPath: null,
+  visible: true,
+  sourceSoulPath: "C:/story/writers-room/ruth.soul.md",
+  allowedTasks: ["punch_up"],
+  bodyMarkdown: "## Taste"
+};
 
 describe("project repository", () => {
   it("saves and loads a project document", () => {
@@ -70,5 +84,43 @@ describe("project repository", () => {
     expect(() => repo.updatePersona("missing-persona", { name: "Nope" })).toThrow(
       "Persona not found: missing-persona"
     );
+  });
+
+  it("adds multiple AI notes in their original order before existing notes", () => {
+    const projectDir = tempProjectDir();
+    const repo = openProjectRepository(projectDir);
+    const seed = {
+      ...createSeedProject(),
+      personas: [testPersona]
+    };
+    const existingNote = {
+      id: "note-existing",
+      sceneId: "scene-opening",
+      personaId: seed.personas[0].id,
+      task: "punch_up" as const,
+      prompt: "Existing prompt",
+      response: "Existing response",
+      model: "gpt-5.4-mini",
+      createdAt: "2026-05-08T00:00:00.000Z"
+    };
+    const firstNote = {
+      ...existingNote,
+      id: "note-first",
+      personaId: seed.personas[0].id
+    };
+    const secondNote = {
+      ...existingNote,
+      id: "note-second",
+      personaId: seed.personas[0].id
+    };
+
+    repo.saveProject({
+      ...seed,
+      aiNotes: [existingNote]
+    });
+
+    const updated = repo.addAiNotes([firstNote, secondNote]);
+
+    expect(updated.aiNotes.map((note) => note.id)).toEqual(["note-first", "note-second", "note-existing"]);
   });
 });

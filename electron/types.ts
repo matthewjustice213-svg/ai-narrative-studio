@@ -15,4 +15,5 @@ export type ProjectRepository = {
   upsertPersona(persona: Persona): ProjectDocument;
   updatePersona(personaId: string, patch: PersonaPatch): ProjectDocument;
   addAiNote(note: AiNote): ProjectDocument;
+  addAiNotes(notes: AiNote[]): ProjectDocument;
 };

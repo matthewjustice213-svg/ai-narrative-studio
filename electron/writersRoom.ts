@@ -1,17 +1,12 @@
 import crypto from "node:crypto";
 import type { AiNote, AiTask, Persona, ProjectDocument, Scene } from "../src/lib/schema.js";
+import type { WritersRoomError } from "../src/lib/electronApi.js";
 
 export type GeneratePersonaText = (input: {
   persona: Persona;
   prompt: string;
   model: string;
 }) => Promise<string>;
-
-export type WritersRoomError = {
-  personaId: string;
-  personaName: string;
-  message: string;
-};
 
 export type WritersRoomRunResult = {
   notes: AiNote[];

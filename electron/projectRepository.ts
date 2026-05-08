@@ -156,6 +156,12 @@ export function openProjectRepository(projectDir: string): ProjectRepository {
         ...project,
         aiNotes: [note, ...project.aiNotes]
       }));
+    },
+    addAiNotes(notes: AiNote[]) {
+      return mutate((project) => ({
+        ...project,
+        aiNotes: [...notes, ...project.aiNotes]
+      }));
     }
   };
 }
