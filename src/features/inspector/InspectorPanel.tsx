@@ -1,73 +1,212 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useProjectStore } from "../../app/useProjectStore.js";
+
+type SceneDraft = {
+  title: string;
+  summary: string;
+  emotionalTone: string;
+  runtimeEstimate: string;
+  beatNotes: string;
+  screenplayText: string;
+};
+
+type CharacterDraft = {
+  name: string;
+  role: string;
+  bio: string;
+  motivation: string;
+  fear: string;
+  dialogueStyle: string;
+};
 
 export function InspectorPanel() {
   const project = useProjectStore((state) => state.project);
   const selection = useProjectStore((state) => state.selection);
   const updateScene = useProjectStore((state) => state.updateScene);
+  const updateCharacter = useProjectStore((state) => state.updateCharacter);
 
   const selectedScene = useMemo(
     () => (selection?.type === "scene" ? project.scenes.find((scene) => scene.id === selection.id) : null),
     [project.scenes, selection]
   );
+  const selectedCharacter = useMemo(
+    () =>
+      selection?.type === "character"
+        ? project.characters.find((character) => character.id === selection.id)
+        : null,
+    [project.characters, selection]
+  );
 
-  if (!selectedScene) {
+  const [sceneDraft, setSceneDraft] = useState<SceneDraft | null>(null);
+  const [characterDraft, setCharacterDraft] = useState<CharacterDraft | null>(null);
+
+  useEffect(() => {
+    if (!selectedScene) {
+      setSceneDraft(null);
+      return;
+    }
+
+    setSceneDraft({
+      title: selectedScene.title,
+      summary: selectedScene.summary,
+      emotionalTone: selectedScene.emotionalTone,
+      runtimeEstimate: String(selectedScene.runtimeEstimate),
+      beatNotes: selectedScene.beatNotes,
+      screenplayText: selectedScene.screenplayText
+    });
+  }, [selectedScene]);
+
+  useEffect(() => {
+    if (!selectedCharacter) {
+      setCharacterDraft(null);
+      return;
+    }
+
+    setCharacterDraft({
+      name: selectedCharacter.name,
+      role: selectedCharacter.role,
+      bio: selectedCharacter.bio,
+      motivation: selectedCharacter.motivation,
+      fear: selectedCharacter.fear,
+      dialogueStyle: selectedCharacter.dialogueStyle
+    });
+  }, [selectedCharacter]);
+
+  if (selectedScene && sceneDraft) {
+    const saveDraft = () => {
+      const runtimeEstimate = Number(sceneDraft.runtimeEstimate);
+      void updateScene(selectedScene.id, {
+        title: sceneDraft.title,
+        summary: sceneDraft.summary,
+        emotionalTone: sceneDraft.emotionalTone,
+        runtimeEstimate: Number.isFinite(runtimeEstimate) ? Math.max(0, runtimeEstimate) : 0,
+        beatNotes: sceneDraft.beatNotes,
+        screenplayText: sceneDraft.screenplayText
+      });
+    };
+
     return (
       <aside className="inspector-panel">
-        <h2>Inspector</h2>
-        <p className="muted">Select a scene node to edit story details.</p>
+        <h2>Scene Inspector</h2>
+        <label>
+          Title
+          <input
+            value={sceneDraft.title}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, title: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Summary
+          <textarea
+            value={sceneDraft.summary}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, summary: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Tone
+          <input
+            value={sceneDraft.emotionalTone}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, emotionalTone: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Runtime Estimate
+          <input
+            type="number"
+            min={0}
+            value={sceneDraft.runtimeEstimate}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, runtimeEstimate: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Beat Notes
+          <textarea
+            value={sceneDraft.beatNotes}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, beatNotes: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Screenplay Text
+          <textarea
+            className="screenplay-field"
+            value={sceneDraft.screenplayText}
+            onChange={(event) => setSceneDraft({ ...sceneDraft, screenplayText: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+      </aside>
+    );
+  }
+
+  if (selectedCharacter && characterDraft) {
+    const saveDraft = () => {
+      void updateCharacter(selectedCharacter.id, characterDraft);
+    };
+
+    return (
+      <aside className="inspector-panel">
+        <h2>Character Inspector</h2>
+        <label>
+          Name
+          <input
+            value={characterDraft.name}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, name: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Role
+          <input
+            value={characterDraft.role}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, role: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Bio
+          <textarea
+            value={characterDraft.bio}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, bio: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Motivation
+          <textarea
+            value={characterDraft.motivation}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, motivation: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Fear
+          <textarea
+            value={characterDraft.fear}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, fear: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Dialogue Style
+          <textarea
+            value={characterDraft.dialogueStyle}
+            onChange={(event) => setCharacterDraft({ ...characterDraft, dialogueStyle: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
       </aside>
     );
   }
 
   return (
     <aside className="inspector-panel">
-      <h2>Scene Inspector</h2>
-      <label>
-        Title
-        <input
-          value={selectedScene.title}
-          onChange={(event) => void updateScene(selectedScene.id, { title: event.target.value })}
-        />
-      </label>
-      <label>
-        Summary
-        <textarea
-          value={selectedScene.summary}
-          onChange={(event) => void updateScene(selectedScene.id, { summary: event.target.value })}
-        />
-      </label>
-      <label>
-        Tone
-        <input
-          value={selectedScene.emotionalTone}
-          onChange={(event) => void updateScene(selectedScene.id, { emotionalTone: event.target.value })}
-        />
-      </label>
-      <label>
-        Runtime Estimate
-        <input
-          type="number"
-          min={0}
-          value={selectedScene.runtimeEstimate}
-          onChange={(event) => void updateScene(selectedScene.id, { runtimeEstimate: Number(event.target.value) })}
-        />
-      </label>
-      <label>
-        Beat Notes
-        <textarea
-          value={selectedScene.beatNotes}
-          onChange={(event) => void updateScene(selectedScene.id, { beatNotes: event.target.value })}
-        />
-      </label>
-      <label>
-        Screenplay Text
-        <textarea
-          className="screenplay-field"
-          value={selectedScene.screenplayText}
-          onChange={(event) => void updateScene(selectedScene.id, { screenplayText: event.target.value })}
-        />
-      </label>
+      <h2>Inspector</h2>
+      <p className="muted">Select a scene or character node to edit story details.</p>
     </aside>
   );
 }

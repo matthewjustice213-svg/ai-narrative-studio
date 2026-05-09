@@ -136,10 +136,11 @@ describe("ipc handlers", () => {
 
     registerIpcHandlers();
 
-    expect(ipcMain.handle).toHaveBeenCalledTimes(11);
+    expect(ipcMain.handle).toHaveBeenCalledTimes(12);
     expect(handlers.has("project:create-dialog")).toBe(true);
     expect(handlers.has("project:open-dialog")).toBe(true);
     expect(handlers.has("persona:import-dialog")).toBe(true);
+    expect(handlers.has("persona:select-avatar-dialog")).toBe(true);
     expect(handlers.has("project:create")).toBe(false);
     expect(handlers.has("project:open")).toBe(false);
     expect(handlers.has("persona:import")).toBe(false);
@@ -181,6 +182,22 @@ describe("ipc handlers", () => {
     await expect(invoke("persona:import-dialog")).rejects.toThrow("No project is open.");
     expect(showOpenDialog).not.toHaveBeenCalled();
     expect(upsertPersona).not.toHaveBeenCalled();
+  });
+
+  it("selects a persona avatar through a main-process file dialog", async () => {
+    showOpenDialog
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/avatars/ruth.png"] });
+    await invoke("project:open-dialog");
+
+    await invoke("persona:select-avatar-dialog", "persona-ruth");
+
+    expect(showOpenDialog).toHaveBeenLastCalledWith({
+      title: "Choose persona avatar",
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
+    });
+    expect(updatePersona).toHaveBeenCalledWith("persona-ruth", { avatarPath: "file:///C:/avatars/ruth.png" });
   });
 
   it("strips protected fields from persona update payloads", async () => {

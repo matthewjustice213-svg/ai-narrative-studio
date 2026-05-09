@@ -1,6 +1,7 @@
 import { dialog, ipcMain } from "electron";
 import keytar from "keytar";
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import {
   projectSchema,
   type AiTask,
@@ -29,6 +30,7 @@ const registeredChannels = [
   "character:update",
   "edges:replace",
   "persona:import-dialog",
+  "persona:select-avatar-dialog",
   "persona:update",
   "writers-room:run",
   "settings:set-openai-key",
@@ -72,6 +74,12 @@ function repo() {
 function loadProjectFromDir(projectDir: string) {
   const repository = openProjectRepository(projectDir);
   return repository.loadProject();
+}
+
+function toRenderableAvatarUrl(avatarPath: string | null) {
+  if (!avatarPath) return null;
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(avatarPath)) return avatarPath;
+  return pathToFileURL(avatarPath).href;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -217,8 +225,32 @@ export function registerIpcHandlers() {
     const soulPath = result.filePaths[0];
     const markdown = readFileSync(soulPath, "utf-8");
     const persona = parseSoulMarkdown(markdown, soulPath);
-    return repository.upsertPersona(persona);
+    return repository.upsertPersona({
+      ...persona,
+      avatarPath: toRenderableAvatarUrl(persona.avatarPath)
+    });
   });
+
+  ipcMain.handle(
+    "persona:select-avatar-dialog",
+    async (_event, personaId: string): Promise<ProjectDocument | null> => {
+      const repository = repo();
+      const result = await dialog.showOpenDialog({
+        title: "Choose persona avatar",
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Images",
+            extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"]
+          }
+        ]
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+
+      return repository.updatePersona(personaId, { avatarPath: toRenderableAvatarUrl(result.filePaths[0]) });
+    }
+  );
 
   ipcMain.handle(
     "persona:update",

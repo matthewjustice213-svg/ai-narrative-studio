@@ -9,17 +9,13 @@ import ReactFlow, {
   type Node,
   type NodeDragHandler,
   type NodeMouseHandler,
+  type NodeTypes,
   type OnConnect
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useProjectStore } from "../../app/useProjectStore.js";
 import { CharacterNode } from "./CharacterNode.js";
 import { SceneNode } from "./SceneNode.js";
-
-const nodeTypes = {
-  scene: SceneNode,
-  character: CharacterNode
-};
 
 export function StoryCanvas() {
   const project = useProjectStore((state) => state.project);
@@ -29,6 +25,13 @@ export function StoryCanvas() {
   const updateScene = useProjectStore((state) => state.updateScene);
   const updateCharacter = useProjectStore((state) => state.updateCharacter);
   const replaceEdges = useProjectStore((state) => state.replaceEdges);
+  const nodeTypes = useMemo<NodeTypes>(
+    () => ({
+      scene: SceneNode,
+      character: CharacterNode
+    }),
+    []
+  );
 
   const nodes: Node[] = useMemo(
     () => [

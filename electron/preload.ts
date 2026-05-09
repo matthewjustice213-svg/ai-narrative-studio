@@ -23,6 +23,9 @@ const narrativeStudio: NarrativeStudioApi = {
   importSoulWithDialog() {
     return ipcRenderer.invoke("persona:import-dialog");
   },
+  selectPersonaAvatarWithDialog(personaId) {
+    return ipcRenderer.invoke("persona:select-avatar-dialog", personaId);
+  },
   updatePersona(personaId, patch) {
     return ipcRenderer.invoke("persona:update", personaId, patch);
   },

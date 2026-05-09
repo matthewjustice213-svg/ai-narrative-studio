@@ -13,12 +13,15 @@ export function AiDock() {
   const saveOpenAiKey = useProjectStore((state) => state.saveOpenAiKey);
 
   const notes = selection?.type === "scene" ? project.aiNotes.filter((note) => note.sceneId === selection.id) : [];
+  const selectedScene = selection?.type === "scene" ? project.scenes.find((scene) => scene.id === selection.id) : null;
+  const visibleWriters = project.personas.filter((persona) => persona.visible).length;
+  const canAskWriters = Boolean(selectedScene) && visibleWriters > 0 && !loadingAi;
 
   return (
     <section className="ai-dock">
       <header>
         <h2>AI Dock</h2>
-        <span>{project.personas.filter((persona) => persona.visible).length} writers visible</span>
+        <span>{visibleWriters} writers visible</span>
       </header>
       <form
         className="key-form"
@@ -33,21 +36,25 @@ export function AiDock() {
           value={apiKey}
           onChange={(event) => setApiKey(event.target.value)}
           aria-label="OpenAI API key"
+          placeholder="OpenAI API key"
         />
-        <button type="submit" title="Save OpenAI API key">
+        <button type="submit" title="Save OpenAI API key" disabled={!apiKey.trim()}>
           <KeyRound size={16} />
         </button>
       </form>
       <div className="ai-actions">
-        <button onClick={() => void runWritersRoom("scene_notes")} disabled={loadingAi}>
+        <button onClick={() => void runWritersRoom("scene_notes")} disabled={!canAskWriters}>
           <MessageSquareText size={16} />
           Scene Notes
         </button>
-        <button onClick={() => void runWritersRoom("punch_up")} disabled={loadingAi}>
+        <button onClick={() => void runWritersRoom("punch_up")} disabled={!canAskWriters}>
           <Sparkles size={16} />
           Punch-Up
         </button>
       </div>
+      {loadingAi ? <p className="ai-status">Asking the visible writers room...</p> : null}
+      {!selectedScene ? <p className="muted">Select a scene before asking for notes.</p> : null}
+      {selectedScene && visibleWriters === 0 ? <p className="muted">Show at least one writer to run the room.</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
       {aiErrors.map((item) => (
         <article key={item.personaId} className="ai-note error-card">
@@ -67,6 +74,13 @@ export function AiDock() {
             </article>
           );
         })}
+        {selectedScene && !loadingAi && notes.length === 0 ? (
+          <article className="ai-note empty-state">
+            <strong>{selectedScene.title}</strong>
+            <small>No AI notes yet</small>
+            <p>Run Scene Notes or Punch-Up to collect responses from the visible writers.</p>
+          </article>
+        ) : null}
       </div>
     </section>
   );

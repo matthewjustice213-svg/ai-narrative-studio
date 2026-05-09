@@ -24,6 +24,7 @@ export type NarrativeStudioApi = {
   updateCharacter(characterId: string, patch: Partial<Omit<Character, "id">>): Promise<ProjectDocument>;
   replaceEdges(edges: GraphEdge[]): Promise<ProjectDocument>;
   importSoulWithDialog(): Promise<ProjectDocument | null>;
+  selectPersonaAvatarWithDialog(personaId: string): Promise<ProjectDocument | null>;
   updatePersona(personaId: string, patch: PersonaUpdatePatch): Promise<ProjectDocument>;
   runWritersRoom(sceneId: string, task: AiTask): Promise<WritersRoomResponse>;
   setOpenAiKey(apiKey: string): Promise<void>;

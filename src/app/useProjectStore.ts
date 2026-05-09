@@ -16,6 +16,9 @@ type ProjectState = {
   openProjectWithDialog(): Promise<void>;
   importSoulWithDialog(): Promise<void>;
   saveOpenAiKey(apiKey: string): Promise<void>;
+  createScene(): Promise<void>;
+  createCharacter(): Promise<void>;
+  selectPersonaAvatarWithDialog(personaId: string): Promise<void>;
   selectScene(id: string): void;
   selectCharacter(id: string): void;
   clearSelection(): void;
@@ -32,6 +35,10 @@ function errorMessage(error: unknown, fallback: string) {
 
 function firstSceneSelection(project: ProjectDocument): Selection {
   return project.scenes[0] ? { type: "scene", id: project.scenes[0].id } : null;
+}
+
+function createId(prefix: string) {
+  return `${prefix}-${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -82,6 +89,76 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ error: null });
     } catch (error) {
       set({ error: errorMessage(error, "OpenAI API key save failed.") });
+    }
+  },
+  createScene: async () => {
+    const project = get().project;
+    const lastScene = project.scenes.at(-1);
+    const sceneId = createId("scene");
+    const nextScene: Scene = {
+      id: sceneId,
+      title: "New Scene",
+      summary: "",
+      screenplayText: "",
+      beatNotes: "",
+      emotionalTone: "undecided",
+      runtimeEstimate: 1,
+      tags: [],
+      linkedCharacterIds: [],
+      position: {
+        x: (lastScene?.position.x ?? 80) + 280,
+        y: lastScene?.position.y ?? 90
+      }
+    };
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        scenes: [...project.scenes, nextScene]
+      });
+      set({ project: saved, selection: { type: "scene", id: sceneId }, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Create or open a project before adding scenes.") });
+    }
+  },
+  createCharacter: async () => {
+    const project = get().project;
+    const lastCharacter = project.characters.at(-1);
+    const characterId = createId("char");
+    const nextCharacter: Character = {
+      id: characterId,
+      name: "New Character",
+      role: "Role",
+      bio: "",
+      motivation: "",
+      fear: "",
+      dialogueStyle: "",
+      avatarPath: null,
+      linkedSceneIds: [],
+      position: {
+        x: (lastCharacter?.position.x ?? 420) + 260,
+        y: lastCharacter?.position.y ?? 520
+      }
+    };
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        characters: [...project.characters, nextCharacter]
+      });
+      set({ project: saved, selection: { type: "character", id: characterId }, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Create or open a project before adding characters.") });
+    }
+  },
+  selectPersonaAvatarWithDialog: async (personaId) => {
+    try {
+      const project = await window.narrativeStudio.selectPersonaAvatarWithDialog(personaId);
+      if (project) {
+        set({ project, error: null });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Persona avatar update failed.") });
     }
   },
   selectScene: (id) => set({ selection: { type: "scene", id } }),

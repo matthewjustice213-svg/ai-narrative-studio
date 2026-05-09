@@ -1,4 +1,4 @@
-import { Eye, EyeOff, FilePlus2, FolderOpen, UserPlus } from "lucide-react";
+import { Eye, EyeOff, FilePlus2, FolderOpen, Plus, UserPlus } from "lucide-react";
 import { useProjectStore } from "../../app/useProjectStore.js";
 
 export function ProjectPanel() {
@@ -9,6 +9,8 @@ export function ProjectPanel() {
   const createProjectWithDialog = useProjectStore((state) => state.createProjectWithDialog);
   const openProjectWithDialog = useProjectStore((state) => state.openProjectWithDialog);
   const importSoulWithDialog = useProjectStore((state) => state.importSoulWithDialog);
+  const createScene = useProjectStore((state) => state.createScene);
+  const createCharacter = useProjectStore((state) => state.createCharacter);
 
   return (
     <aside className="project-panel">
@@ -32,7 +34,12 @@ export function ProjectPanel() {
       </div>
 
       <section>
-        <h2>Scenes</h2>
+        <div className="section-heading">
+          <h2>Scenes</h2>
+          <button className="mini-button" title="Add scene" onClick={() => void createScene()}>
+            <Plus size={14} />
+          </button>
+        </div>
         {project.scenes.map((scene) => (
           <button key={scene.id} className="list-row" onClick={() => selectScene(scene.id)}>
             <span>{scene.title}</span>
@@ -42,7 +49,12 @@ export function ProjectPanel() {
       </section>
 
       <section>
-        <h2>Characters</h2>
+        <div className="section-heading">
+          <h2>Characters</h2>
+          <button className="mini-button" title="Add character" onClick={() => void createCharacter()}>
+            <UserPlus size={14} />
+          </button>
+        </div>
         {project.characters.map((character) => (
           <button key={character.id} className="list-row" onClick={() => selectCharacter(character.id)}>
             <span>{character.name}</span>
@@ -58,7 +70,9 @@ export function ProjectPanel() {
         ) : (
           project.personas.map((persona) => (
             <button key={persona.id} className="persona-row" onClick={() => void togglePersona(persona.id)}>
-              <span className="avatar small">{persona.name.slice(0, 2).toUpperCase()}</span>
+              <span className="avatar small">
+                {persona.avatarPath ? <img src={persona.avatarPath} alt="" /> : persona.name.slice(0, 2).toUpperCase()}
+              </span>
               <span>
                 <strong>{persona.name}</strong>
                 <small>{persona.role}</small>
