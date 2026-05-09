@@ -6,8 +6,10 @@ import { registerIpcHandlers } from "./ipc.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let mainWindow: BrowserWindow | null = null;
+
 async function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1440,
     height: 920,
     minWidth: 1180,
@@ -22,13 +24,16 @@ async function createWindow() {
     }
   });
 
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
   if (process.env.VITE_DEV_SERVER_URL) {
-    await win.loadURL(process.env.VITE_DEV_SERVER_URL);
-    win.webContents.openDevTools({ mode: "detach" });
+    await mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     return;
   }
 
-  await win.loadFile(path.join(__dirname, "../../dist/index.html"));
+  await mainWindow.loadFile(path.join(__dirname, "../../dist/index.html"));
 }
 
 app.whenReady().then(() => {
@@ -41,5 +46,5 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) void createWindow();
+  if (!mainWindow && BrowserWindow.getAllWindows().length === 0) void createWindow();
 });
