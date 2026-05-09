@@ -149,7 +149,10 @@ describe("ipc handlers", () => {
     showOpenDialog.mockResolvedValueOnce({ canceled: true, filePaths: [] });
 
     await expect(invoke("project:create-dialog")).resolves.toBeNull();
-    expect(showOpenDialog).toHaveBeenCalledWith({ properties: ["openDirectory", "createDirectory"] });
+    expect(showOpenDialog).toHaveBeenCalledWith({
+      title: "Choose or create a project folder",
+      properties: ["openDirectory", "createDirectory"]
+    });
     expect(loadProject).not.toHaveBeenCalled();
   });
 

@@ -122,7 +122,10 @@ function sanitizeProjectForSave(incoming: ProjectDocument, current: ProjectDocum
 }
 
 async function selectProjectDirectory(properties: Array<"openDirectory" | "createDirectory">) {
-  const result = await dialog.showOpenDialog({ properties });
+  const result = await dialog.showOpenDialog({
+    title: properties.includes("createDirectory") ? "Choose or create a project folder" : "Open AI Narrative Studio project folder",
+    properties
+  });
   if (result.canceled || result.filePaths.length === 0) return null;
   return result.filePaths[0];
 }
@@ -205,6 +208,7 @@ export function registerIpcHandlers() {
   ipcMain.handle("persona:import-dialog", async (): Promise<ProjectDocument | null> => {
     const repository = repo();
     const result = await dialog.showOpenDialog({
+      title: "Import structured soul.md persona",
       properties: ["openFile"],
       filters: [{ name: "Soul Markdown", extensions: ["md"] }]
     });

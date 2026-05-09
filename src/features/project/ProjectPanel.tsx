@@ -1,4 +1,4 @@
-import { Eye, EyeOff, FilePlus2 } from "lucide-react";
+import { Eye, EyeOff, FilePlus2, FolderOpen, UserPlus } from "lucide-react";
 import { useProjectStore } from "../../app/useProjectStore.js";
 
 export function ProjectPanel() {
@@ -6,6 +6,9 @@ export function ProjectPanel() {
   const selectScene = useProjectStore((state) => state.selectScene);
   const selectCharacter = useProjectStore((state) => state.selectCharacter);
   const togglePersona = useProjectStore((state) => state.togglePersona);
+  const createProjectWithDialog = useProjectStore((state) => state.createProjectWithDialog);
+  const openProjectWithDialog = useProjectStore((state) => state.openProjectWithDialog);
+  const importSoulWithDialog = useProjectStore((state) => state.importSoulWithDialog);
 
   return (
     <aside className="project-panel">
@@ -14,10 +17,19 @@ export function ProjectPanel() {
           <span className="eyebrow">Project</span>
           <h1>{project.title}</h1>
         </div>
-        <button className="icon-button" title="New scene">
+      </header>
+
+      <div className="toolbar-row">
+        <button className="icon-button" title="Create project" onClick={() => void createProjectWithDialog()}>
           <FilePlus2 size={16} />
         </button>
-      </header>
+        <button className="icon-button" title="Open project" onClick={() => void openProjectWithDialog()}>
+          <FolderOpen size={16} />
+        </button>
+        <button className="icon-button" title="Import soul.md" onClick={() => void importSoulWithDialog()}>
+          <UserPlus size={16} />
+        </button>
+      </div>
 
       <section>
         <h2>Scenes</h2>

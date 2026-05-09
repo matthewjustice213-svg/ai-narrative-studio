@@ -12,6 +12,10 @@ type ProjectState = {
   error: string | null;
   aiErrors: WritersRoomError[];
   setProject(project: ProjectDocument): void;
+  createProjectWithDialog(): Promise<void>;
+  openProjectWithDialog(): Promise<void>;
+  importSoulWithDialog(): Promise<void>;
+  saveOpenAiKey(apiKey: string): Promise<void>;
   selectScene(id: string): void;
   selectCharacter(id: string): void;
   clearSelection(): void;
@@ -26,6 +30,10 @@ function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function firstSceneSelection(project: ProjectDocument): Selection {
+  return project.scenes[0] ? { type: "scene", id: project.scenes[0].id } : null;
+}
+
 export const useProjectStore = create<ProjectState>((set, get) => ({
   project: createSeedProject(),
   selection: { type: "scene", id: "scene-opening" },
@@ -33,6 +41,49 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   error: null,
   aiErrors: [],
   setProject: (project) => set({ project, error: null }),
+  createProjectWithDialog: async () => {
+    try {
+      const project = await window.narrativeStudio.createProjectWithDialog();
+      if (project) {
+        set({ project, selection: firstSceneSelection(project), error: null, aiErrors: [] });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Project creation failed.") });
+    }
+  },
+  openProjectWithDialog: async () => {
+    try {
+      const project = await window.narrativeStudio.openProjectWithDialog();
+      if (project) {
+        set({ project, selection: firstSceneSelection(project), error: null, aiErrors: [] });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Project open failed.") });
+    }
+  },
+  importSoulWithDialog: async () => {
+    try {
+      const project = await window.narrativeStudio.importSoulWithDialog();
+      if (project) {
+        set({ project, error: null });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Persona import failed.") });
+    }
+  },
+  saveOpenAiKey: async (apiKey) => {
+    if (!apiKey.trim()) {
+      set({ error: "Enter an OpenAI API key before saving." });
+      return;
+    }
+
+    try {
+      await window.narrativeStudio.setOpenAiKey(apiKey.trim());
+      set({ error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "OpenAI API key save failed.") });
+    }
+  },
   selectScene: (id) => set({ selection: { type: "scene", id } }),
   selectCharacter: (id) => set({ selection: { type: "character", id } }),
   clearSelection: () => set({ selection: null }),
