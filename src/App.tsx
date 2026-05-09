@@ -1,9 +1,25 @@
+import { AiDock } from "./features/ai-dock/AiDock.js";
+import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
+import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
+import { ProjectPanel } from "./features/project/ProjectPanel.js";
+import { WritersRoomPanel } from "./features/writers-room/WritersRoomPanel.js";
+
 export default function App() {
   return (
-    <main className="app-shell">
-      <section className="panel left-panel">AI Narrative Studio</section>
-      <section className="canvas-empty">Story graph canvas loading...</section>
-      <section className="panel right-panel">Inspector</section>
+    <main className="workspace">
+      <ProjectPanel />
+      <StoryCanvas />
+      <section className="right-stack">
+        <InspectorPanel />
+        <WritersRoomPanel />
+        <AiDock />
+      </section>
+      <nav className="bottom-tabs" aria-label="Workspace modes">
+        <button className="active">Canvas</button>
+        <button disabled>Timeline</button>
+        <button disabled>Screenplay</button>
+        <button disabled>Analysis</button>
+      </nav>
     </main>
   );
 }
