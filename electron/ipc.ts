@@ -1,6 +1,7 @@
-import { dialog, ipcMain } from "electron";
+import { app, dialog, ipcMain } from "electron";
 import keytar from "keytar";
 import { readFileSync } from "node:fs";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   projectSchema,
@@ -23,6 +24,7 @@ let activeProjectDir: string | null = null;
 let handlersRegistered = false;
 
 const registeredChannels = [
+  "project:load-default",
   "project:create-dialog",
   "project:open-dialog",
   "project:save",
@@ -65,15 +67,25 @@ const personaPatchKeys = ["visible", "avatarPath", "name", "role", "specialty", 
 
 function repo() {
   if (!activeProjectDir) {
-    throw new Error("No project is open.");
+    activeProjectDir = defaultProjectDir();
   }
 
   return openProjectRepository(activeProjectDir);
 }
 
+function defaultProjectDir() {
+  return path.join(app.getPath("userData"), "projects", "default");
+}
+
 function loadProjectFromDir(projectDir: string) {
   const repository = openProjectRepository(projectDir);
   return repository.loadProject();
+}
+
+function activateProjectDir(projectDir: string) {
+  const project = loadProjectFromDir(projectDir);
+  activeProjectDir = projectDir;
+  return project;
 }
 
 function toRenderableAvatarUrl(avatarPath: string | null) {
@@ -167,22 +179,20 @@ export function registerIpcHandlers() {
   if (handlersRegistered) return;
   handlersRegistered = true;
 
+  ipcMain.handle("project:load-default", (): ProjectDocument => activateProjectDir(defaultProjectDir()));
+
   ipcMain.handle("project:create-dialog", async (): Promise<ProjectDocument | null> => {
     const projectDir = await selectProjectDirectory(["openDirectory", "createDirectory"]);
     if (!projectDir) return null;
 
-    const project = loadProjectFromDir(projectDir);
-    activeProjectDir = projectDir;
-    return project;
+    return activateProjectDir(projectDir);
   });
 
   ipcMain.handle("project:open-dialog", async (): Promise<ProjectDocument | null> => {
     const projectDir = await selectProjectDirectory(["openDirectory"]);
     if (!projectDir) return null;
 
-    const project = loadProjectFromDir(projectDir);
-    activeProjectDir = projectDir;
-    return project;
+    return activateProjectDir(projectDir);
   });
 
   ipcMain.handle("project:save", (_event, projectPayload: unknown): ProjectDocument => {

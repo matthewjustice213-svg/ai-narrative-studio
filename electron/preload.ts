@@ -2,6 +2,9 @@ import { contextBridge, ipcRenderer } from "electron";
 import type { NarrativeStudioApi } from "../src/lib/electronApi.js";
 
 const narrativeStudio: NarrativeStudioApi = {
+  loadDefaultProject() {
+    return ipcRenderer.invoke("project:load-default");
+  },
   createProjectWithDialog() {
     return ipcRenderer.invoke("project:create-dialog");
   },

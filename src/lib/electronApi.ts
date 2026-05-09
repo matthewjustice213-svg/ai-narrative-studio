@@ -17,6 +17,7 @@ export type PersonaUpdatePatch = Partial<
 >;
 
 export type NarrativeStudioApi = {
+  loadDefaultProject(): Promise<ProjectDocument>;
   createProjectWithDialog(): Promise<ProjectDocument | null>;
   openProjectWithDialog(): Promise<ProjectDocument | null>;
   saveProject(project: ProjectDocument): Promise<ProjectDocument>;

@@ -9,6 +9,7 @@ type Handler = (...args: unknown[]) => unknown;
 
 const handlers = new Map<string, Handler>();
 const showOpenDialog = vi.fn();
+const getPath = vi.fn();
 const getPassword = vi.fn();
 const setPassword = vi.fn();
 const loadProject = vi.fn();
@@ -22,6 +23,9 @@ const generateOpenAiText = vi.fn();
 let tempDirs: string[] = [];
 
 vi.mock("electron", () => ({
+  app: {
+    getPath
+  },
   ipcMain: {
     handle: vi.fn((channel: string, handler: Handler) => {
       handlers.set(channel, handler);
@@ -105,6 +109,10 @@ function tempSoulFile() {
   return file;
 }
 
+function defaultProjectPath() {
+  return path.join("C:/user-data", "projects", "default");
+}
+
 describe("ipc handlers", () => {
   afterEach(() => {
     for (const dir of tempDirs) rmSync(dir, { recursive: true, force: true });
@@ -114,6 +122,7 @@ describe("ipc handlers", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     handlers.clear();
+    getPath.mockReturnValue("C:/user-data");
     loadProject.mockReturnValue(createSeedProject());
     saveProject.mockReturnValue(undefined);
     upsertPersona.mockReturnValue(createSeedProject());
@@ -136,7 +145,8 @@ describe("ipc handlers", () => {
 
     registerIpcHandlers();
 
-    expect(ipcMain.handle).toHaveBeenCalledTimes(12);
+    expect(ipcMain.handle).toHaveBeenCalledTimes(13);
+    expect(handlers.has("project:load-default")).toBe(true);
     expect(handlers.has("project:create-dialog")).toBe(true);
     expect(handlers.has("project:open-dialog")).toBe(true);
     expect(handlers.has("persona:import-dialog")).toBe(true);
@@ -155,6 +165,16 @@ describe("ipc handlers", () => {
       properties: ["openDirectory", "createDirectory"]
     });
     expect(loadProject).not.toHaveBeenCalled();
+  });
+
+  it("loads a default local project so editor actions work before folder setup", async () => {
+    const project = createSeedProject();
+    loadProject.mockReturnValueOnce(project);
+
+    expect(invoke("project:load-default")).toBe(project);
+
+    const { openProjectRepository } = await import("../projectRepository.js");
+    expect(openProjectRepository).toHaveBeenCalledWith(defaultProjectPath());
   });
 
   it("does not switch active project when a dialog-selected project fails to load", async () => {
@@ -178,10 +198,22 @@ describe("ipc handlers", () => {
     expect(openProjectRepository).toHaveBeenLastCalledWith("C:/projects/existing");
   });
 
-  it("requires an active project before importing a soul file", async () => {
-    await expect(invoke("persona:import-dialog")).rejects.toThrow("No project is open.");
-    expect(showOpenDialog).not.toHaveBeenCalled();
-    expect(upsertPersona).not.toHaveBeenCalled();
+  it("imports a soul file into the default local project when no folder is open", async () => {
+    const importedProject = { ...createSeedProject(), title: "Imported" };
+    const soulFile = tempSoulFile();
+    showOpenDialog.mockResolvedValueOnce({ canceled: false, filePaths: [soulFile] });
+    upsertPersona.mockReturnValueOnce(importedProject);
+
+    await expect(invoke("persona:import-dialog")).resolves.toBe(importedProject);
+
+    const { openProjectRepository } = await import("../projectRepository.js");
+    expect(openProjectRepository).toHaveBeenCalledWith(defaultProjectPath());
+    expect(showOpenDialog).toHaveBeenCalledWith({
+      title: "Import structured soul.md persona",
+      properties: ["openFile"],
+      filters: [{ name: "Soul Markdown", extensions: ["md"] }]
+    });
+    expect(upsertPersona).toHaveBeenCalled();
   });
 
   it("selects a persona avatar through a main-process file dialog", async () => {
@@ -325,9 +357,16 @@ describe("ipc handlers", () => {
     );
   });
 
-  it("requires an active project before checking OpenAI credentials", async () => {
-    await expect(invoke("writers-room:run", "scene-opening", "punch_up")).rejects.toThrow("No project is open.");
-    expect(getPassword).not.toHaveBeenCalled();
+  it("uses the default local project before checking OpenAI credentials", async () => {
+    getPassword.mockResolvedValueOnce(null);
+
+    await expect(invoke("writers-room:run", "scene-opening", "punch_up")).rejects.toThrow(
+      "OpenAI API key is missing."
+    );
+
+    const { openProjectRepository } = await import("../projectRepository.js");
+    expect(openProjectRepository).toHaveBeenCalledWith(defaultProjectPath());
+    expect(getPassword).toHaveBeenCalled();
   });
 
   it("normalizes credential save failures", async () => {

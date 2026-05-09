@@ -12,6 +12,7 @@ type ProjectState = {
   error: string | null;
   aiErrors: WritersRoomError[];
   setProject(project: ProjectDocument): void;
+  loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
   importSoulWithDialog(): Promise<void>;
@@ -48,6 +49,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   error: null,
   aiErrors: [],
   setProject: (project) => set({ project, error: null }),
+  loadDefaultProject: async () => {
+    try {
+      const project = await window.narrativeStudio.loadDefaultProject();
+      set({ project, selection: firstSceneSelection(project), error: null, aiErrors: [] });
+    } catch (error) {
+      set({ error: errorMessage(error, "Default project load failed.") });
+    }
+  },
   createProjectWithDialog: async () => {
     try {
       const project = await window.narrativeStudio.createProjectWithDialog();
