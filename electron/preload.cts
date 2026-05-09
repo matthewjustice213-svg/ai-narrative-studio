@@ -20,6 +20,9 @@ const narrativeStudio: NarrativeStudioApi = {
   updateCharacter(characterId, patch) {
     return ipcRenderer.invoke("character:update", characterId, patch);
   },
+  selectCharacterAvatarWithDialog(characterId) {
+    return ipcRenderer.invoke("character:select-avatar-dialog", characterId);
+  },
   replaceEdges(edges) {
     return ipcRenderer.invoke("edges:replace", edges);
   },

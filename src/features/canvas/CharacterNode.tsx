@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import type { Character } from "../../lib/schema.js";
 
@@ -8,9 +9,13 @@ export function CharacterNode({ data, selected }: NodeProps<Character>) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const color = data.color || "#ff4fd8";
 
   return (
-    <article className={`story-node character-node ${selected ? "selected" : ""}`}>
+    <article
+      className={`story-node character-node ${selected ? "selected" : ""}`}
+      style={{ "--node-color": color } as CSSProperties}
+    >
       <Handle type="target" position={Position.Left} />
       <div className="avatar">{data.avatarPath ? <img src={data.avatarPath} alt="" /> : initials}</div>
       <div>

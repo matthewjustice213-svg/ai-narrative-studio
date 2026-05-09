@@ -23,6 +23,7 @@ export type NarrativeStudioApi = {
   saveProject(project: ProjectDocument): Promise<ProjectDocument>;
   updateScene(sceneId: string, patch: Partial<Omit<Scene, "id">>): Promise<ProjectDocument>;
   updateCharacter(characterId: string, patch: Partial<Omit<Character, "id">>): Promise<ProjectDocument>;
+  selectCharacterAvatarWithDialog(characterId: string): Promise<ProjectDocument | null>;
   replaceEdges(edges: GraphEdge[]): Promise<ProjectDocument>;
   importSoulWithDialog(): Promise<ProjectDocument | null>;
   selectPersonaAvatarWithDialog(personaId: string): Promise<ProjectDocument | null>;

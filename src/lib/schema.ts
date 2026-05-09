@@ -25,6 +25,15 @@ export const pointSchema = z.object({
   y: z.number()
 });
 
+export const groupBoxSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  color: z.string().min(1),
+  position: pointSchema,
+  width: z.number().min(160),
+  height: z.number().min(120)
+});
+
 export const sceneSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -35,6 +44,7 @@ export const sceneSchema = z.object({
   runtimeEstimate: z.number().min(0),
   tags: z.array(z.string()),
   linkedCharacterIds: z.array(z.string()),
+  color: z.string().nullable().default(null),
   position: pointSchema
 });
 
@@ -48,6 +58,7 @@ export const characterSchema = z.object({
   dialogueStyle: z.string(),
   avatarPath: z.string().nullable(),
   linkedSceneIds: z.array(z.string()),
+  color: z.string().nullable().default(null),
   position: pointSchema
 });
 
@@ -93,6 +104,7 @@ export const projectSchema = z.object({
     model: z.string().min(1),
     projectPath: z.string().nullable()
   }),
+  groupBoxes: z.array(groupBoxSchema).default([]),
   scenes: z.array(sceneSchema),
   characters: z.array(characterSchema),
   edges: z.array(graphEdgeSchema),
@@ -125,6 +137,7 @@ export const projectSchema = z.object({
 
   addDuplicateIdIssues(project.scenes, "scenes");
   addDuplicateIdIssues(project.characters, "characters");
+  addDuplicateIdIssues(project.groupBoxes, "groupBoxes");
   addDuplicateIdIssues(project.edges, "edges");
   addDuplicateIdIssues(project.personas, "personas");
   addDuplicateIdIssues(project.aiNotes, "aiNotes");
@@ -227,6 +240,7 @@ export const soulFrontmatterSchema = z.object({
 });
 
 export type AiTask = z.infer<typeof aiTaskSchema>;
+export type GroupBox = z.infer<typeof groupBoxSchema>;
 export type Scene = z.infer<typeof sceneSchema>;
 export type Character = z.infer<typeof characterSchema>;
 export type GraphEdge = z.infer<typeof graphEdgeSchema>;

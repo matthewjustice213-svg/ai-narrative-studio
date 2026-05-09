@@ -19,11 +19,19 @@ type CharacterDraft = {
   dialogueStyle: string;
 };
 
+type GroupBoxDraft = {
+  title: string;
+  color: string;
+  width: string;
+  height: string;
+};
+
 export function InspectorPanel() {
   const project = useProjectStore((state) => state.project);
   const selection = useProjectStore((state) => state.selection);
   const updateScene = useProjectStore((state) => state.updateScene);
   const updateCharacter = useProjectStore((state) => state.updateCharacter);
+  const updateGroupBox = useProjectStore((state) => state.updateGroupBox);
 
   const selectedScene = useMemo(
     () => (selection?.type === "scene" ? project.scenes.find((scene) => scene.id === selection.id) : null),
@@ -36,9 +44,17 @@ export function InspectorPanel() {
         : null,
     [project.characters, selection]
   );
+  const selectedGroupBox = useMemo(
+    () =>
+      selection?.type === "groupBox"
+        ? project.groupBoxes.find((groupBox) => groupBox.id === selection.id)
+        : null,
+    [project.groupBoxes, selection]
+  );
 
   const [sceneDraft, setSceneDraft] = useState<SceneDraft | null>(null);
   const [characterDraft, setCharacterDraft] = useState<CharacterDraft | null>(null);
+  const [groupBoxDraft, setGroupBoxDraft] = useState<GroupBoxDraft | null>(null);
 
   useEffect(() => {
     if (!selectedScene) {
@@ -71,6 +87,20 @@ export function InspectorPanel() {
       dialogueStyle: selectedCharacter.dialogueStyle
     });
   }, [selectedCharacter]);
+
+  useEffect(() => {
+    if (!selectedGroupBox) {
+      setGroupBoxDraft(null);
+      return;
+    }
+
+    setGroupBoxDraft({
+      title: selectedGroupBox.title,
+      color: selectedGroupBox.color,
+      width: String(selectedGroupBox.width),
+      height: String(selectedGroupBox.height)
+    });
+  }, [selectedGroupBox]);
 
   if (selectedScene && sceneDraft) {
     const saveDraft = () => {
@@ -196,6 +226,61 @@ export function InspectorPanel() {
           <textarea
             value={characterDraft.dialogueStyle}
             onChange={(event) => setCharacterDraft({ ...characterDraft, dialogueStyle: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+      </aside>
+    );
+  }
+
+  if (selectedGroupBox && groupBoxDraft) {
+    const saveDraft = () => {
+      const width = Number(groupBoxDraft.width);
+      const height = Number(groupBoxDraft.height);
+      void updateGroupBox(selectedGroupBox.id, {
+        title: groupBoxDraft.title.trim() || "Group Box",
+        color: groupBoxDraft.color.trim() || "#38d8ff",
+        width: Number.isFinite(width) ? Math.max(160, width) : 520,
+        height: Number.isFinite(height) ? Math.max(120, height) : 320
+      });
+    };
+
+    return (
+      <aside className="inspector-panel">
+        <h2>Box Inspector</h2>
+        <label>
+          Label
+          <input
+            value={groupBoxDraft.title}
+            onChange={(event) => setGroupBoxDraft({ ...groupBoxDraft, title: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Color
+          <input
+            value={groupBoxDraft.color}
+            onChange={(event) => setGroupBoxDraft({ ...groupBoxDraft, color: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Width
+          <input
+            type="number"
+            min={160}
+            value={groupBoxDraft.width}
+            onChange={(event) => setGroupBoxDraft({ ...groupBoxDraft, width: event.target.value })}
+            onBlur={saveDraft}
+          />
+        </label>
+        <label>
+          Height
+          <input
+            type="number"
+            min={120}
+            value={groupBoxDraft.height}
+            onChange={(event) => setGroupBoxDraft({ ...groupBoxDraft, height: event.target.value })}
             onBlur={saveDraft}
           />
         </label>

@@ -17,6 +17,7 @@ const saveProject = vi.fn();
 const upsertPersona = vi.fn();
 const updatePersona = vi.fn();
 const updateScene = vi.fn();
+const updateCharacter = vi.fn();
 const addAiNotes = vi.fn();
 const runVisibleWriters = vi.fn();
 const generateOpenAiText = vi.fn();
@@ -51,7 +52,7 @@ vi.mock("../projectRepository.js", () => ({
     loadProject,
     saveProject,
     updateScene,
-    updateCharacter: vi.fn(),
+    updateCharacter,
     replaceEdges: vi.fn(),
     upsertPersona,
     updatePersona,
@@ -128,6 +129,7 @@ describe("ipc handlers", () => {
     upsertPersona.mockReturnValue(createSeedProject());
     updatePersona.mockReturnValue(createSeedProject());
     updateScene.mockReturnValue(createSeedProject());
+    updateCharacter.mockReturnValue(createSeedProject());
     addAiNotes.mockImplementation((notes: AiNote[]) => ({
       ...createSeedProject(),
       aiNotes: notes
@@ -145,12 +147,13 @@ describe("ipc handlers", () => {
 
     registerIpcHandlers();
 
-    expect(ipcMain.handle).toHaveBeenCalledTimes(13);
+    expect(ipcMain.handle).toHaveBeenCalledTimes(14);
     expect(handlers.has("project:load-default")).toBe(true);
     expect(handlers.has("project:create-dialog")).toBe(true);
     expect(handlers.has("project:open-dialog")).toBe(true);
     expect(handlers.has("persona:import-dialog")).toBe(true);
     expect(handlers.has("persona:select-avatar-dialog")).toBe(true);
+    expect(handlers.has("character:select-avatar-dialog")).toBe(true);
     expect(handlers.has("project:create")).toBe(false);
     expect(handlers.has("project:open")).toBe(false);
     expect(handlers.has("persona:import")).toBe(false);
@@ -230,6 +233,22 @@ describe("ipc handlers", () => {
       filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
     });
     expect(updatePersona).toHaveBeenCalledWith("persona-ruth", { avatarPath: "file:///C:/avatars/ruth.png" });
+  });
+
+  it("selects a character avatar through a main-process file dialog", async () => {
+    showOpenDialog
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/avatars/fries.png"] });
+    await invoke("project:open-dialog");
+
+    await invoke("character:select-avatar-dialog", "char-fries");
+
+    expect(showOpenDialog).toHaveBeenLastCalledWith({
+      title: "Choose character avatar",
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
+    });
+    expect(updateCharacter).toHaveBeenCalledWith("char-fries", { avatarPath: "file:///C:/avatars/fries.png" });
   });
 
   it("strips protected fields from persona update payloads", async () => {

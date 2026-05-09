@@ -3,11 +3,53 @@ import { projectSchema, soulFrontmatterSchema } from "../schema";
 import { createSeedProject } from "../seedProject";
 
 describe("project schema", () => {
+  function withoutColor<T extends { color?: unknown }>(item: T) {
+    const copy = { ...item };
+    delete copy.color;
+    return copy;
+  }
+
   it("accepts the seed story graph", () => {
     const parsed = projectSchema.parse(createSeedProject());
     expect(parsed.scenes).toHaveLength(3);
     expect(parsed.edges[0].type).toBe("progression");
     expect(parsed.settings.model).toBe("gpt-5.4-mini");
+  });
+
+  it("backfills visual organization defaults on older project documents", () => {
+    const project = createSeedProject();
+    const legacyProject = {
+      ...project,
+      scenes: project.scenes.map(withoutColor),
+      characters: project.characters.map(withoutColor)
+    };
+
+    const parsed = projectSchema.parse(legacyProject);
+
+    expect(parsed.groupBoxes).toEqual([]);
+    expect(parsed.scenes[0].color).toBeNull();
+    expect(parsed.characters[0].color).toBeNull();
+  });
+
+  it("accepts labeled group boxes for corralling story nodes", () => {
+    const project = createSeedProject();
+
+    const parsed = projectSchema.parse({
+      ...project,
+      groupBoxes: [
+        {
+          id: "group-story",
+          title: "Story",
+          color: "#38d8ff",
+          position: { x: 40, y: 40 },
+          width: 880,
+          height: 320
+        }
+      ]
+    });
+
+    expect(parsed.groupBoxes[0].title).toBe("Story");
+    expect(parsed.groupBoxes[0].width).toBe(880);
   });
 
   it("rejects a soul frontmatter object without a required name", () => {
@@ -61,6 +103,25 @@ describe("project schema", () => {
     project.edges[1].id = project.edges[0].id;
 
     expect(() => projectSchema.parse(project)).toThrow();
+  });
+
+  it("rejects duplicate group box IDs", () => {
+    const project = createSeedProject();
+    const groupBox = {
+      id: "group-story",
+      title: "Story",
+      color: "#38d8ff",
+      position: { x: 40, y: 40 },
+      width: 880,
+      height: 320
+    };
+
+    expect(() =>
+      projectSchema.parse({
+        ...project,
+        groupBoxes: [groupBox, { ...groupBox, title: "Characters" }]
+      })
+    ).toThrow();
   });
 
   it("rejects duplicate persona IDs", () => {

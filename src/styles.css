@@ -57,6 +57,7 @@ button {
 }
 
 .canvas-wrap {
+  position: relative;
   min-width: 0;
   min-height: 0;
   width: 100%;
@@ -325,7 +326,7 @@ h2 {
   inset: 0 auto 0 0;
   width: 5px;
   border-radius: 8px 0 0 8px;
-  background: #ffb15c;
+  background: var(--node-color, #ffb15c);
 }
 
 .scene-node header {
@@ -342,7 +343,7 @@ h2 {
 }
 
 .scene-node header span {
-  color: #ffb15c;
+  color: var(--node-color, #ffb15c);
   font-size: 12px;
 }
 
@@ -375,14 +376,113 @@ h2 {
   width: 280px;
   min-height: 132px;
   padding: 13px;
-  border-color: rgba(255, 79, 216, 0.45);
+  border-color: color-mix(in srgb, var(--node-color, #ff4fd8) 62%, transparent);
 }
 
 .character-node span {
   display: block;
   margin-top: 3px;
-  color: #ff4fd8;
+  color: var(--node-color, #ff4fd8);
   font-size: 12px;
+}
+
+.group-box-node {
+  width: 100%;
+  height: 100%;
+  border: 1px solid color-mix(in srgb, var(--group-color, #38d8ff) 72%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--group-color, #38d8ff) 14%, transparent),
+      rgba(13, 17, 25, 0.2)
+    );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.group-box-node.selected {
+  border-color: var(--group-color, #38d8ff);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--group-color, #38d8ff) 40%, transparent);
+}
+
+.group-box-node header {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 10px;
+  border: 1px solid color-mix(in srgb, var(--group-color, #38d8ff) 60%, #10131b);
+  border-radius: 6px;
+  background: rgba(6, 7, 11, 0.72);
+  color: #e7edf7;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.canvas-menu {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  gap: 4px;
+  min-width: 190px;
+  border: 1px solid #334055;
+  border-radius: 8px;
+  background: #101722;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.45);
+  padding: 7px;
+}
+
+.canvas-menu button {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #d8e4f2;
+  padding: 7px 8px;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.canvas-menu button:hover {
+  border-color: #38d8ff;
+  color: #38d8ff;
+  background: rgba(56, 216, 255, 0.08);
+}
+
+.canvas-menu > span {
+  margin-top: 3px;
+  color: #7f8da3;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.color-menu {
+  display: flex;
+  gap: 6px;
+  padding: 3px 2px 5px;
+}
+
+.color-menu button {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 0;
+}
+
+.color-menu .clear-swatch {
+  background:
+    linear-gradient(135deg, transparent 0 45%, #d8e4f2 47% 53%, transparent 55%),
+    #151b26;
+}
+
+.canvas-menu .danger-action {
+  color: #ffb15c;
 }
 
 .react-flow__handle {

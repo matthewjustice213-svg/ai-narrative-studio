@@ -11,6 +11,7 @@ export function createSeedProject(): ProjectDocument {
       model: "gpt-5.4-mini",
       projectPath: null
     },
+    groupBoxes: [],
     scenes: [
       {
         id: "scene-opening",
@@ -22,6 +23,7 @@ export function createSeedProject(): ProjectDocument {
         runtimeEstimate: 2,
         tags: ["opening", "pressure"],
         linkedCharacterIds: ["char-fries"],
+        color: null,
         position: { x: 80, y: 90 }
       },
       {
@@ -34,6 +36,7 @@ export function createSeedProject(): ProjectDocument {
         runtimeEstimate: 3,
         tags: ["escalation"],
         linkedCharacterIds: ["char-fries"],
+        color: null,
         position: { x: 420, y: 210 }
       },
       {
@@ -46,6 +49,7 @@ export function createSeedProject(): ProjectDocument {
         runtimeEstimate: 2,
         tags: ["turn"],
         linkedCharacterIds: ["char-fries"],
+        color: null,
         position: { x: 760, y: 120 }
       }
     ],
@@ -60,6 +64,7 @@ export function createSeedProject(): ProjectDocument {
         dialogueStyle: "Deflects with jokes before admitting the truth.",
         avatarPath: null,
         linkedSceneIds: ["scene-opening", "scene-complication", "scene-turn"],
+        color: null,
         position: { x: 420, y: 520 }
       }
     ],

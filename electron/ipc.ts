@@ -30,6 +30,7 @@ const registeredChannels = [
   "project:save",
   "scene:update",
   "character:update",
+  "character:select-avatar-dialog",
   "edges:replace",
   "persona:import-dialog",
   "persona:select-avatar-dialog",
@@ -219,6 +220,27 @@ export function registerIpcHandlers() {
         characterId,
         pickPatch<Omit<Character, "id">>(patch, characterPatchKeys, "Invalid character patch.")
       )
+  );
+
+  ipcMain.handle(
+    "character:select-avatar-dialog",
+    async (_event, characterId: string): Promise<ProjectDocument | null> => {
+      const repository = repo();
+      const result = await dialog.showOpenDialog({
+        title: "Choose character avatar",
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Images",
+            extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"]
+          }
+        ]
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+
+      return repository.updateCharacter(characterId, { avatarPath: toRenderableAvatarUrl(result.filePaths[0]) });
+    }
   );
 
   ipcMain.handle("edges:replace", (_event, edges: GraphEdge[]): ProjectDocument => repo().replaceEdges(edges));

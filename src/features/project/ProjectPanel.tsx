@@ -5,12 +5,14 @@ export function ProjectPanel() {
   const project = useProjectStore((state) => state.project);
   const selectScene = useProjectStore((state) => state.selectScene);
   const selectCharacter = useProjectStore((state) => state.selectCharacter);
+  const selectGroupBox = useProjectStore((state) => state.selectGroupBox);
   const togglePersona = useProjectStore((state) => state.togglePersona);
   const createProjectWithDialog = useProjectStore((state) => state.createProjectWithDialog);
   const openProjectWithDialog = useProjectStore((state) => state.openProjectWithDialog);
   const importSoulWithDialog = useProjectStore((state) => state.importSoulWithDialog);
   const createScene = useProjectStore((state) => state.createScene);
   const createCharacter = useProjectStore((state) => state.createCharacter);
+  const createGroupBox = useProjectStore((state) => state.createGroupBox);
 
   return (
     <aside className="project-panel">
@@ -61,6 +63,25 @@ export function ProjectPanel() {
             <small>{character.role}</small>
           </button>
         ))}
+      </section>
+
+      <section>
+        <div className="section-heading">
+          <h2>Boxes</h2>
+          <button className="mini-button" title="Add group box" onClick={() => void createGroupBox()}>
+            <Plus size={14} />
+          </button>
+        </div>
+        {project.groupBoxes.length === 0 ? (
+          <p className="muted">Right-click the canvas to create organization boxes.</p>
+        ) : (
+          project.groupBoxes.map((groupBox) => (
+            <button key={groupBox.id} className="list-row" onClick={() => selectGroupBox(groupBox.id)}>
+              <span>{groupBox.title}</span>
+              <small>{Math.round(groupBox.width)}x{Math.round(groupBox.height)}</small>
+            </button>
+          ))
+        )}
       </section>
 
       <section>

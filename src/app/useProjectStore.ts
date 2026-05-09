@@ -1,9 +1,21 @@
 import { create } from "zustand";
-import type { AiTask, Character, GraphEdge, ProjectDocument, Scene } from "../lib/schema.js";
+import type { AiTask, Character, GraphEdge, GroupBox, ProjectDocument, Scene } from "../lib/schema.js";
 import { createSeedProject } from "../lib/seedProject.js";
 import type { WritersRoomError } from "../lib/electronApi.js";
+import {
+  createGroupBoxAroundNodes,
+  deleteGraphNode,
+  deleteGroupBox,
+  setGraphNodeColor,
+  updateGroupBox,
+  upsertGroupBox
+} from "./projectMutations.js";
 
-type Selection = { type: "scene"; id: string } | { type: "character"; id: string } | null;
+type Selection =
+  | { type: "scene"; id: string }
+  | { type: "character"; id: string }
+  | { type: "groupBox"; id: string }
+  | null;
 
 type ProjectState = {
   project: ProjectDocument;
@@ -19,9 +31,17 @@ type ProjectState = {
   saveOpenAiKey(apiKey: string): Promise<void>;
   createScene(): Promise<void>;
   createCharacter(): Promise<void>;
+  createGroupBox(position?: { x: number; y: number }): Promise<void>;
+  createGroupBoxAround(nodeType: "scene" | "character"): Promise<void>;
+  deleteNode(type: "scene" | "character", id: string): Promise<void>;
+  deleteGroupBox(id: string): Promise<void>;
+  setNodeColor(type: "scene" | "character", id: string, color: string | null): Promise<void>;
+  updateGroupBox(id: string, patch: Partial<Omit<GroupBox, "id">>): Promise<void>;
   selectPersonaAvatarWithDialog(personaId: string): Promise<void>;
+  selectCharacterAvatarWithDialog(characterId: string): Promise<void>;
   selectScene(id: string): void;
   selectCharacter(id: string): void;
+  selectGroupBox(id: string): void;
   clearSelection(): void;
   updateScene(sceneId: string, patch: Partial<Omit<Scene, "id">>): Promise<void>;
   updateCharacter(characterId: string, patch: Partial<Omit<Character, "id">>): Promise<void>;
@@ -114,6 +134,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       runtimeEstimate: 1,
       tags: [],
       linkedCharacterIds: [],
+      color: null,
       position: {
         x: (lastScene?.position.x ?? 80) + 280,
         y: lastScene?.position.y ?? 90
@@ -144,6 +165,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       dialogueStyle: "",
       avatarPath: null,
       linkedSceneIds: [],
+      color: null,
       position: {
         x: (lastCharacter?.position.x ?? 420) + 260,
         y: lastCharacter?.position.y ?? 520
@@ -160,6 +182,82 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ error: errorMessage(error, "Create or open a project before adding characters.") });
     }
   },
+  createGroupBox: async (position) => {
+    const project = get().project;
+    const groupBoxId = createId("group");
+    const nextProject = upsertGroupBox(project, {
+      id: groupBoxId,
+      title: "Group Box",
+      color: "#38d8ff",
+      position: position ?? { x: 120, y: 120 },
+      width: 520,
+      height: 320
+    });
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(nextProject);
+      set({ project: saved, selection: { type: "groupBox", id: groupBoxId }, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Group box creation failed.") });
+    }
+  },
+  createGroupBoxAround: async (nodeType) => {
+    const project = get().project;
+    const groupBoxId = `group-${nodeType}s`;
+    const nextProject = createGroupBoxAroundNodes(project, {
+      id: groupBoxId,
+      nodeType,
+      title: nodeType === "scene" ? "Story" : "Characters",
+      color: nodeType === "scene" ? "#38d8ff" : "#ff4fd8"
+    });
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(nextProject);
+      set({ project: saved, selection: { type: "groupBox", id: groupBoxId }, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Group box creation failed.") });
+    }
+  },
+  deleteNode: async (type, id) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(deleteGraphNode(project, { type, id }));
+      set({ project: saved, selection: firstSceneSelection(saved), error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Node deletion failed.") });
+    }
+  },
+  deleteGroupBox: async (id) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(deleteGroupBox(project, id));
+      set({ project: saved, selection: firstSceneSelection(saved), error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Group box deletion failed.") });
+    }
+  },
+  setNodeColor: async (type, id, color) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(setGraphNodeColor(project, { type, id, color }));
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Node color update failed.") });
+    }
+  },
+  updateGroupBox: async (id, patch) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(updateGroupBox(project, { id, ...patch }));
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Group box update failed.") });
+    }
+  },
   selectPersonaAvatarWithDialog: async (personaId) => {
     try {
       const project = await window.narrativeStudio.selectPersonaAvatarWithDialog(personaId);
@@ -170,8 +268,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ error: errorMessage(error, "Persona avatar update failed.") });
     }
   },
+  selectCharacterAvatarWithDialog: async (characterId) => {
+    try {
+      const project = await window.narrativeStudio.selectCharacterAvatarWithDialog(characterId);
+      if (project) {
+        set({ project, error: null });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Character avatar update failed.") });
+    }
+  },
   selectScene: (id) => set({ selection: { type: "scene", id } }),
   selectCharacter: (id) => set({ selection: { type: "character", id } }),
+  selectGroupBox: (id) => set({ selection: { type: "groupBox", id } }),
   clearSelection: () => set({ selection: null }),
   updateScene: async (sceneId, patch) => {
     try {
