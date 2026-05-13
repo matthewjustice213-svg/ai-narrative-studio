@@ -12,6 +12,7 @@ describe("project schema", () => {
   it("accepts the seed story graph", () => {
     const parsed = projectSchema.parse(createSeedProject());
     expect(parsed.scenes).toHaveLength(3);
+    expect(parsed.storyBeats).toHaveLength(3);
     expect(parsed.edges[0].type).toBe("progression");
     expect(parsed.settings.model).toBe("gpt-5.4-mini");
   });
@@ -20,15 +21,39 @@ describe("project schema", () => {
     const project = createSeedProject();
     const legacyProject = {
       ...project,
+      storyBeats: undefined,
       scenes: project.scenes.map(withoutColor),
       characters: project.characters.map(withoutColor)
     };
 
     const parsed = projectSchema.parse(legacyProject);
 
+    expect(parsed.storyBeats).toEqual([]);
     expect(parsed.groupBoxes).toEqual([]);
     expect(parsed.scenes[0].color).toBeNull();
     expect(parsed.characters[0].color).toBeNull();
+  });
+
+  it("accepts story beat cards across structure columns", () => {
+    const project = createSeedProject();
+
+    const parsed = projectSchema.parse({
+      ...project,
+      storyBeats: [
+        {
+          id: "beat-opening-pressure",
+          title: "Opening pressure",
+          summary: "Fries tries to look in control.",
+          columnId: "act_1",
+          color: "#38d8ff",
+          tags: ["setup"],
+          order: 0
+        }
+      ]
+    });
+
+    expect(parsed.storyBeats[0].columnId).toBe("act_1");
+    expect(parsed.storyBeats[0].tags).toEqual(["setup"]);
   });
 
   it("accepts labeled group boxes for corralling story nodes", () => {
@@ -120,6 +145,26 @@ describe("project schema", () => {
       projectSchema.parse({
         ...project,
         groupBoxes: [groupBox, { ...groupBox, title: "Characters" }]
+      })
+    ).toThrow();
+  });
+
+  it("rejects duplicate story beat IDs", () => {
+    const project = createSeedProject();
+    const beat = {
+      id: "beat-setup",
+      title: "Setup",
+      summary: "The first promise.",
+      columnId: "act_1",
+      color: null,
+      tags: [],
+      order: 0
+    };
+
+    expect(() =>
+      projectSchema.parse({
+        ...project,
+        storyBeats: [beat, { ...beat, title: "Second setup", order: 1 }]
       })
     ).toThrow();
   });

@@ -1,13 +1,27 @@
 import { create } from "zustand";
-import type { AiTask, Character, GraphEdge, GroupBox, ProjectDocument, Scene } from "../lib/schema.js";
+import type {
+  AiTask,
+  Character,
+  GraphEdge,
+  GroupBox,
+  ProjectDocument,
+  Scene,
+  StoryBeat,
+  StoryBeatColumnId
+} from "../lib/schema.js";
 import { createSeedProject } from "../lib/seedProject.js";
 import type { WritersRoomError } from "../lib/electronApi.js";
 import type { StudioModuleId } from "./studioModules.js";
 import {
+  addStoryBeat as addStoryBeatMutation,
   createGroupBoxAroundNodes,
   deleteGraphNode,
   deleteGroupBox,
+  deleteStoryBeat as deleteStoryBeatMutation,
+  moveStoryBeat as moveStoryBeatMutation,
+  reorderStoryBeat as reorderStoryBeatMutation,
   setGraphNodeColor,
+  updateStoryBeat as updateStoryBeatMutation,
   updateGroupBox,
   upsertGroupBox
 } from "./projectMutations.js";
@@ -21,12 +35,14 @@ type Selection =
 type ProjectState = {
   project: ProjectDocument;
   activeModuleId: StudioModuleId;
+  storyView: "canvas" | "beats";
   selection: Selection;
   loadingAi: boolean;
   error: string | null;
   aiErrors: WritersRoomError[];
   setProject(project: ProjectDocument): void;
   setActiveModule(moduleId: StudioModuleId): void;
+  setStoryView(storyView: "canvas" | "beats"): void;
   loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
@@ -36,6 +52,11 @@ type ProjectState = {
   createCharacter(): Promise<void>;
   createGroupBox(position?: { x: number; y: number }): Promise<void>;
   createGroupBoxAround(nodeType: "scene" | "character"): Promise<void>;
+  createStoryBeat(columnId?: StoryBeatColumnId): Promise<void>;
+  updateStoryBeat(storyBeatId: string, patch: Partial<Omit<StoryBeat, "id" | "order">>): Promise<void>;
+  moveStoryBeat(storyBeatId: string, columnId: StoryBeatColumnId): Promise<void>;
+  reorderStoryBeat(storyBeatId: string, direction: "up" | "down"): Promise<void>;
+  deleteStoryBeat(storyBeatId: string): Promise<void>;
   deleteNode(type: "scene" | "character", id: string): Promise<void>;
   deleteGroupBox(id: string): Promise<void>;
   setNodeColor(type: "scene" | "character", id: string, color: string | null): Promise<void>;
@@ -68,12 +89,14 @@ function createId(prefix: string) {
 export const useProjectStore = create<ProjectState>((set, get) => ({
   project: createSeedProject(),
   activeModuleId: "story",
+  storyView: "canvas",
   selection: { type: "scene", id: "scene-opening" },
   loadingAi: false,
   error: null,
   aiErrors: [],
   setProject: (project) => set({ project, error: null }),
   setActiveModule: (activeModuleId) => set({ activeModuleId }),
+  setStoryView: (storyView) => set({ storyView, activeModuleId: "story" }),
   loadDefaultProject: async () => {
     try {
       const project = await window.narrativeStudio.loadDefaultProject();
@@ -221,6 +244,76 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ project: saved, selection: { type: "groupBox", id: groupBoxId }, error: null });
     } catch (error) {
       set({ error: errorMessage(error, "Group box creation failed.") });
+    }
+  },
+  createStoryBeat: async (columnId = "unassigned") => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(
+        addStoryBeatMutation(project, {
+          id: createId("beat"),
+          columnId
+        })
+      );
+      set({ project: saved, activeModuleId: "story", storyView: "beats", error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Story beat creation failed.") });
+    }
+  },
+  updateStoryBeat: async (storyBeatId, patch) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(
+        updateStoryBeatMutation(project, {
+          id: storyBeatId,
+          ...patch
+        })
+      );
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Story beat update failed.") });
+    }
+  },
+  moveStoryBeat: async (storyBeatId, columnId) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(
+        moveStoryBeatMutation(project, {
+          id: storyBeatId,
+          columnId
+        })
+      );
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Story beat move failed.") });
+    }
+  },
+  reorderStoryBeat: async (storyBeatId, direction) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(
+        reorderStoryBeatMutation(project, {
+          id: storyBeatId,
+          direction
+        })
+      );
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Story beat reorder failed.") });
+    }
+  },
+  deleteStoryBeat: async (storyBeatId) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject(deleteStoryBeatMutation(project, storyBeatId));
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Story beat deletion failed.") });
     }
   },
   deleteNode: async (type, id) => {

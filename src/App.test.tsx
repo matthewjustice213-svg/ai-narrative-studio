@@ -37,4 +37,15 @@ describe("App", () => {
     expect(screen.getByText("Screenplay block editor")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
+
+  it("switches BB Story from the node canvas to a beat board", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Beats" }));
+
+    expect(screen.getByText("Story Beat Board")).toBeTruthy();
+    expect(screen.getAllByText("Act 1").length).toBeGreaterThan(0);
+    expect(screen.getByDisplayValue("Opening pressure")).toBeTruthy();
+    expect(screen.queryByText("Scene Inspector")).toBeNull();
+  });
 });

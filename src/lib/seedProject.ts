@@ -11,6 +11,35 @@ export function createSeedProject(): ProjectDocument {
       model: "gpt-5.4-mini",
       projectPath: null
     },
+    storyBeats: [
+      {
+        id: "beat-opening-pressure",
+        title: "Opening pressure",
+        summary: "Fries tries to look in control while the room proves otherwise.",
+        columnId: "act_1",
+        color: "#38d8ff",
+        tags: ["opening", "pressure"],
+        order: 0
+      },
+      {
+        id: "beat-bad-news",
+        title: "Bad news arrives",
+        summary: "A tiny problem becomes impossible to ignore.",
+        columnId: "act_2a",
+        color: "#ffb15c",
+        tags: ["escalation"],
+        order: 0
+      },
+      {
+        id: "beat-false-confidence",
+        title: "False confidence",
+        summary: "Fries chooses performance over honesty.",
+        columnId: "act_2b",
+        color: "#ff4fd8",
+        tags: ["turn"],
+        order: 0
+      }
+    ],
     groupBoxes: [],
     scenes: [
       {

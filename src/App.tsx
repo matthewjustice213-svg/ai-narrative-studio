@@ -15,6 +15,7 @@ import { AiDock } from "./features/ai-dock/AiDock.js";
 import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
+import { BeatBoard } from "./features/story/BeatBoard.js";
 import { WritersRoomPanel } from "./features/writers-room/WritersRoomPanel.js";
 
 const moduleIcons: Record<StudioModuleId, LucideIcon> = {
@@ -31,9 +32,12 @@ export default function App() {
   const loadDefaultProject = useProjectStore((state) => state.loadDefaultProject);
   const project = useProjectStore((state) => state.project);
   const activeModuleId = useProjectStore((state) => state.activeModuleId);
+  const storyView = useProjectStore((state) => state.storyView);
   const setActiveModule = useProjectStore((state) => state.setActiveModule);
+  const setStoryView = useProjectStore((state) => state.setStoryView);
   const activeModule = studioModules.find((module) => module.id === activeModuleId) ?? studioModules[0];
   const isStoryModule = activeModule.id === "story";
+  const isStoryCanvas = isStoryModule && storyView === "canvas";
 
   useEffect(() => {
     if (!window.narrativeStudio?.loadDefaultProject) return;
@@ -86,10 +90,10 @@ export default function App() {
         })}
       </nav>
       <ProjectPanel />
-      <section className={isStoryModule ? "module-workspace" : "module-workspace expanded"}>
-        {isStoryModule ? <StoryCanvas /> : <ModulePlaceholder module={activeModule} />}
+      <section className={isStoryCanvas ? "module-workspace" : "module-workspace expanded"}>
+        {isStoryCanvas ? <StoryCanvas /> : isStoryModule ? <BeatBoard /> : <ModulePlaceholder module={activeModule} />}
       </section>
-      {isStoryModule ? (
+      {isStoryCanvas ? (
         <section className="right-stack">
           <InspectorPanel />
           <WritersRoomPanel />
@@ -97,7 +101,16 @@ export default function App() {
         </section>
       ) : null}
       <nav className="bottom-tabs" aria-label="Workspace modes">
-        <button className="active">Canvas</button>
+        <button className={isStoryCanvas ? "active" : ""} aria-pressed={isStoryCanvas} onClick={() => setStoryView("canvas")}>
+          Canvas
+        </button>
+        <button
+          className={isStoryModule && storyView === "beats" ? "active" : ""}
+          aria-pressed={isStoryModule && storyView === "beats"}
+          onClick={() => setStoryView("beats")}
+        >
+          Beats
+        </button>
         <button disabled>Timeline</button>
         <button disabled>Screenplay</button>
         <button disabled>Analysis</button>

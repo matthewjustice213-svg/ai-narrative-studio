@@ -25,6 +25,18 @@ export const pointSchema = z.object({
   y: z.number()
 });
 
+export const storyBeatColumnSchema = z.enum(["unassigned", "act_1", "act_2a", "midpoint", "act_2b", "act_3"]);
+
+export const storyBeatSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  summary: z.string(),
+  columnId: storyBeatColumnSchema,
+  color: z.string().nullable().default(null),
+  tags: z.array(z.string()).default([]),
+  order: z.number().min(0)
+});
+
 export const groupBoxSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -104,6 +116,7 @@ export const projectSchema = z.object({
     model: z.string().min(1),
     projectPath: z.string().nullable()
   }),
+  storyBeats: z.array(storyBeatSchema).default([]),
   groupBoxes: z.array(groupBoxSchema).default([]),
   scenes: z.array(sceneSchema),
   characters: z.array(characterSchema),
@@ -137,6 +150,7 @@ export const projectSchema = z.object({
 
   addDuplicateIdIssues(project.scenes, "scenes");
   addDuplicateIdIssues(project.characters, "characters");
+  addDuplicateIdIssues(project.storyBeats, "storyBeats");
   addDuplicateIdIssues(project.groupBoxes, "groupBoxes");
   addDuplicateIdIssues(project.edges, "edges");
   addDuplicateIdIssues(project.personas, "personas");
@@ -240,6 +254,8 @@ export const soulFrontmatterSchema = z.object({
 });
 
 export type AiTask = z.infer<typeof aiTaskSchema>;
+export type StoryBeatColumnId = z.infer<typeof storyBeatColumnSchema>;
+export type StoryBeat = z.infer<typeof storyBeatSchema>;
 export type GroupBox = z.infer<typeof groupBoxSchema>;
 export type Scene = z.infer<typeof sceneSchema>;
 export type Character = z.infer<typeof characterSchema>;
