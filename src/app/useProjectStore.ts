@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { AiTask, Character, GraphEdge, GroupBox, ProjectDocument, Scene } from "../lib/schema.js";
 import { createSeedProject } from "../lib/seedProject.js";
 import type { WritersRoomError } from "../lib/electronApi.js";
+import type { StudioModuleId } from "./studioModules.js";
 import {
   createGroupBoxAroundNodes,
   deleteGraphNode,
@@ -19,11 +20,13 @@ type Selection =
 
 type ProjectState = {
   project: ProjectDocument;
+  activeModuleId: StudioModuleId;
   selection: Selection;
   loadingAi: boolean;
   error: string | null;
   aiErrors: WritersRoomError[];
   setProject(project: ProjectDocument): void;
+  setActiveModule(moduleId: StudioModuleId): void;
   loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
@@ -64,11 +67,13 @@ function createId(prefix: string) {
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
   project: createSeedProject(),
+  activeModuleId: "story",
   selection: { type: "scene", id: "scene-opening" },
   loadingAi: false,
   error: null,
   aiErrors: [],
   setProject: (project) => set({ project, error: null }),
+  setActiveModule: (activeModuleId) => set({ activeModuleId }),
   loadDefaultProject: async () => {
     try {
       const project = await window.narrativeStudio.loadDefaultProject();

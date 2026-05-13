@@ -1,4 +1,15 @@
 import { useEffect } from "react";
+import {
+  BookOpen,
+  Camera,
+  Clapperboard,
+  Film,
+  PenLine,
+  Presentation,
+  Users,
+  type LucideIcon
+} from "lucide-react";
+import { studioModules, type StudioModule, type StudioModuleId } from "./app/studioModules.js";
 import { useProjectStore } from "./app/useProjectStore.js";
 import { AiDock } from "./features/ai-dock/AiDock.js";
 import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
@@ -6,8 +17,23 @@ import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
 import { WritersRoomPanel } from "./features/writers-room/WritersRoomPanel.js";
 
+const moduleIcons: Record<StudioModuleId, LucideIcon> = {
+  story: BookOpen,
+  writer: PenLine,
+  characters: Users,
+  director: Clapperboard,
+  pitch: Presentation,
+  animate: Film,
+  capture: Camera
+};
+
 export default function App() {
   const loadDefaultProject = useProjectStore((state) => state.loadDefaultProject);
+  const project = useProjectStore((state) => state.project);
+  const activeModuleId = useProjectStore((state) => state.activeModuleId);
+  const setActiveModule = useProjectStore((state) => state.setActiveModule);
+  const activeModule = studioModules.find((module) => module.id === activeModuleId) ?? studioModules[0];
+  const isStoryModule = activeModule.id === "story";
 
   useEffect(() => {
     if (!window.narrativeStudio?.loadDefaultProject) return;
@@ -15,14 +41,61 @@ export default function App() {
   }, [loadDefaultProject]);
 
   return (
-    <main className="workspace">
+    <main className="studio-shell">
+      <header className="studio-topbar">
+        <div className="studio-brand">
+          <span className="brand-mark">BB</span>
+          <div>
+            <span className="eyebrow">Cinematic story OS</span>
+            <h1>BB Studio</h1>
+          </div>
+        </div>
+        <div className="project-heading">
+          <span className="eyebrow">Open project</span>
+          <strong>{project.title}</strong>
+        </div>
+        <nav className="module-tabs" aria-label="BB Studio modules">
+          {studioModules.map((module) => (
+            <button
+              key={module.id}
+              className={module.id === activeModule.id ? "active" : ""}
+              aria-pressed={module.id === activeModule.id}
+              onClick={() => setActiveModule(module.id)}
+            >
+              {module.name}
+            </button>
+          ))}
+        </nav>
+      </header>
+      <nav className="activity-rail" aria-label="Module sidebar">
+        {studioModules.map((module) => {
+          const Icon = moduleIcons[module.id];
+
+          return (
+            <button
+              key={module.id}
+              className={module.id === activeModule.id ? "rail-button active" : "rail-button"}
+              aria-pressed={module.id === activeModule.id}
+              onClick={() => setActiveModule(module.id)}
+              title={module.name}
+            >
+              <Icon size={18} />
+              <span>{module.shortName}</span>
+            </button>
+          );
+        })}
+      </nav>
       <ProjectPanel />
-      <StoryCanvas />
-      <section className="right-stack">
-        <InspectorPanel />
-        <WritersRoomPanel />
-        <AiDock />
+      <section className={isStoryModule ? "module-workspace" : "module-workspace expanded"}>
+        {isStoryModule ? <StoryCanvas /> : <ModulePlaceholder module={activeModule} />}
       </section>
+      {isStoryModule ? (
+        <section className="right-stack">
+          <InspectorPanel />
+          <WritersRoomPanel />
+          <AiDock />
+        </section>
+      ) : null}
       <nav className="bottom-tabs" aria-label="Workspace modes">
         <button className="active">Canvas</button>
         <button disabled>Timeline</button>
@@ -30,5 +103,21 @@ export default function App() {
         <button disabled>Analysis</button>
       </nav>
     </main>
+  );
+}
+
+function ModulePlaceholder({ module }: { module: StudioModule }) {
+  const Icon = moduleIcons[module.id];
+
+  return (
+    <section className="module-placeholder" aria-label={`${module.name} placeholder`}>
+      <div className="placeholder-icon">
+        <Icon size={28} />
+      </div>
+      <span className="eyebrow">{module.name}</span>
+      <h2>{module.placeholderTitle}</h2>
+      <p>{module.placeholderDetail}</p>
+      <small>{module.summary}</small>
+    </section>
   );
 }
