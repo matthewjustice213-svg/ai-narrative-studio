@@ -51,6 +51,31 @@ describe("App", () => {
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
+  it("opens BB Characters as a character bible workspace", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /BB Characters/i }));
+
+    expect(screen.getByRole("button", { name: /BB Characters/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Character Bible")).toBeTruthy();
+    expect(screen.getByDisplayValue("Fries")).toBeTruthy();
+    expect(screen.getByDisplayValue("Owner-operator")).toBeTruthy();
+    expect(screen.getByLabelText("Dialogue Style")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Choose Avatar" })).toBeTruthy();
+    expect(screen.queryByText("Scene Inspector")).toBeNull();
+  });
+
+  it("lets BB Characters toggle linked scenes in the profile draft", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /BB Characters/i }));
+    const sceneLink = screen.getByRole("checkbox", { name: "Bad News Arrives" }) as HTMLInputElement;
+
+    expect(sceneLink.checked).toBe(true);
+    fireEvent.click(sceneLink);
+    expect(sceneLink.checked).toBe(false);
+  });
+
   it("exports the current BB Writer draft to markdown", () => {
     render(<App />);
 

@@ -13,6 +13,7 @@ import { studioModules, type StudioModule, type StudioModuleId } from "./app/stu
 import { useProjectStore } from "./app/useProjectStore.js";
 import { AiDock } from "./features/ai-dock/AiDock.js";
 import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
+import { CharacterWorkspace } from "./features/characters/CharacterWorkspace.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
 import { BeatBoard } from "./features/story/BeatBoard.js";
@@ -151,6 +152,8 @@ export default function App() {
           <BeatBoard />
         ) : activeModule.id === "writer" ? (
           <WriterWorkspace />
+        ) : activeModule.id === "characters" ? (
+          <CharacterWorkspace />
         ) : (
           <ModulePlaceholder module={activeModule} />
         )}
