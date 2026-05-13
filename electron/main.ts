@@ -15,7 +15,7 @@ async function createWindow() {
     minWidth: 1180,
     minHeight: 760,
     backgroundColor: "#06070b",
-    title: "AI Narrative Studio",
+    title: "BB Studio",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

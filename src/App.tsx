@@ -16,6 +16,7 @@ import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
 import { BeatBoard } from "./features/story/BeatBoard.js";
+import { WriterWorkspace } from "./features/writer/WriterWorkspace.js";
 import { WritersRoomPanel } from "./features/writers-room/WritersRoomPanel.js";
 
 const moduleIcons: Record<StudioModuleId, LucideIcon> = {
@@ -144,7 +145,15 @@ export default function App() {
         onPointerDown={startHorizontalResize("projectPanelWidth")}
       />
       <section className={isStoryCanvas ? "module-workspace" : "module-workspace expanded"}>
-        {isStoryCanvas ? <StoryCanvas /> : isStoryModule ? <BeatBoard /> : <ModulePlaceholder module={activeModule} />}
+        {isStoryCanvas ? (
+          <StoryCanvas />
+        ) : isStoryModule ? (
+          <BeatBoard />
+        ) : activeModule.id === "writer" ? (
+          <WriterWorkspace />
+        ) : (
+          <ModulePlaceholder module={activeModule} />
+        )}
       </section>
       {isStoryCanvas ? (
         <>
