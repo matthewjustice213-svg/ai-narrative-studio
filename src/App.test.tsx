@@ -48,4 +48,16 @@ describe("App", () => {
     expect(screen.getByDisplayValue("Opening pressure")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
+
+  it("renders Photoshop-style resize handles for the docked workspace", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Canvas" }));
+
+    expect(screen.getByRole("separator", { name: "Resize project sidebar" })).toBeTruthy();
+    expect(screen.getByRole("separator", { name: "Resize right dock" })).toBeTruthy();
+    expect(screen.getByRole("separator", { name: "Resize inspector panel" })).toBeTruthy();
+    expect(screen.getByRole("separator", { name: "Resize writers room panel" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Reset Layout" })).toBeTruthy();
+  });
 });

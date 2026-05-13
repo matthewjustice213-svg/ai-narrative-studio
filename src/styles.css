@@ -32,18 +32,18 @@ button {
 
 .studio-shell {
   display: grid;
-  grid-template-columns: 74px 284px minmax(0, 1fr) 390px;
+  grid-template-columns: 74px var(--project-panel-width, 284px) 6px minmax(0, 1fr) 6px var(--right-panel-width, 430px);
   grid-template-rows: 68px minmax(0, 1fr) 42px;
   width: 100vw;
   height: 100vh;
-  min-width: 1240px;
+  min-width: 1040px;
   background: #06070b;
 }
 
 .studio-topbar {
-  grid-column: 1 / 5;
+  grid-column: 1 / 7;
   display: grid;
-  grid-template-columns: 270px 270px minmax(0, 1fr);
+  grid-template-columns: 270px 270px minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
   border-bottom: 1px solid #242b38;
@@ -91,7 +91,7 @@ button {
   justify-content: flex-end;
   gap: 7px;
   min-width: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .activity-rail {
@@ -123,14 +123,14 @@ button {
 }
 
 .module-workspace {
-  grid-column: 3;
+  grid-column: 4;
   grid-row: 2;
   min-width: 0;
   min-height: 0;
 }
 
 .module-workspace.expanded {
-  grid-column: 3 / 5;
+  grid-column: 4 / 7;
 }
 
 .canvas-wrap {
@@ -153,10 +153,15 @@ button {
 }
 
 .right-stack {
-  grid-column: 4;
+  grid-column: 6;
   grid-row: 2;
   display: grid;
-  grid-template-rows: minmax(280px, 1fr) 218px 270px;
+  grid-template-rows:
+    minmax(180px, var(--inspector-panel-height, 340px))
+    6px
+    minmax(180px, var(--writers-panel-height, 300px))
+    6px
+    minmax(220px, 1fr);
   min-height: 0;
   border-left: 1px solid #242b38;
 }
@@ -174,8 +179,39 @@ button {
   border-top: 1px solid #242b38;
 }
 
+.project-resize-handle {
+  grid-column: 3;
+  grid-row: 2 / 4;
+}
+
+.right-resize-handle {
+  grid-column: 5;
+  grid-row: 2;
+}
+
+.resize-handle {
+  z-index: 10;
+  background: #0d1119;
+}
+
+.resize-handle.vertical {
+  width: 6px;
+  cursor: col-resize;
+}
+
+.resize-handle.horizontal {
+  height: 6px;
+  cursor: row-resize;
+}
+
+.resize-handle:hover,
+.resize-handle:focus {
+  background: #38d8ff;
+  outline: none;
+}
+
 .bottom-tabs {
-  grid-column: 3 / 5;
+  grid-column: 4 / 7;
   grid-row: 3;
   display: flex;
   align-items: center;
@@ -187,6 +223,7 @@ button {
 
 .bottom-tabs button,
 .module-tabs button,
+.layout-reset-button,
 .rail-button,
 .ai-actions button,
 .icon-button,
@@ -209,6 +246,7 @@ button {
 .bottom-tabs button.active,
 .module-tabs button.active,
 .rail-button.active,
+.layout-reset-button:hover,
 .ai-actions button:hover,
 .icon-button:hover,
 .mini-button:hover,
@@ -219,6 +257,7 @@ button {
 
 .bottom-tabs button:disabled,
 .module-tabs button:disabled,
+.layout-reset-button:disabled,
 .ai-actions button:disabled,
 .key-form button:disabled {
   color: #596579;
@@ -228,6 +267,10 @@ button {
 .module-tabs button {
   min-width: 82px;
   padding-inline: 9px;
+}
+
+.layout-reset-button {
+  min-width: 96px;
 }
 
 .rail-button {

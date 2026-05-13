@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties, type PointerEvent } from "react";
 import {
   BookOpen,
   Camera,
@@ -33,11 +33,54 @@ export default function App() {
   const project = useProjectStore((state) => state.project);
   const activeModuleId = useProjectStore((state) => state.activeModuleId);
   const storyView = useProjectStore((state) => state.storyView);
+  const layout = useProjectStore((state) => state.layout);
   const setActiveModule = useProjectStore((state) => state.setActiveModule);
   const setStoryView = useProjectStore((state) => state.setStoryView);
+  const updateLayout = useProjectStore((state) => state.updateLayout);
+  const resetLayout = useProjectStore((state) => state.resetLayout);
   const activeModule = studioModules.find((module) => module.id === activeModuleId) ?? studioModules[0];
   const isStoryModule = activeModule.id === "story";
   const isStoryCanvas = isStoryModule && storyView === "canvas";
+  const shellStyle = {
+    "--project-panel-width": `${layout.projectPanelWidth}px`,
+    "--right-panel-width": `${layout.rightPanelWidth}px`,
+    "--inspector-panel-height": `${layout.inspectorHeight}px`,
+    "--writers-panel-height": `${layout.writersHeight}px`
+  } as CSSProperties;
+
+  const startHorizontalResize =
+    (key: "projectPanelWidth" | "rightPanelWidth") => (event: PointerEvent<HTMLDivElement>) => {
+      const startX = event.clientX;
+      const startValue = layout[key];
+      const direction = key === "projectPanelWidth" ? 1 : -1;
+
+      const onPointerMove = (moveEvent: globalThis.PointerEvent) => {
+        updateLayout({ [key]: startValue + (moveEvent.clientX - startX) * direction });
+      };
+      const onPointerUp = () => {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
+      };
+
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+    };
+
+  const startVerticalResize = (key: "inspectorHeight" | "writersHeight") => (event: PointerEvent<HTMLDivElement>) => {
+    const startY = event.clientY;
+    const startValue = layout[key];
+
+    const onPointerMove = (moveEvent: globalThis.PointerEvent) => {
+      updateLayout({ [key]: startValue + moveEvent.clientY - startY });
+    };
+    const onPointerUp = () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+  };
 
   useEffect(() => {
     if (!window.narrativeStudio?.loadDefaultProject) return;
@@ -45,7 +88,7 @@ export default function App() {
   }, [loadDefaultProject]);
 
   return (
-    <main className="studio-shell">
+    <main className="studio-shell" style={shellStyle}>
       <header className="studio-topbar">
         <div className="studio-brand">
           <span className="brand-mark">BB</span>
@@ -70,6 +113,9 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <button className="layout-reset-button" onClick={resetLayout}>
+          Reset Layout
+        </button>
       </header>
       <nav className="activity-rail" aria-label="Module sidebar">
         {studioModules.map((module) => {
@@ -90,15 +136,45 @@ export default function App() {
         })}
       </nav>
       <ProjectPanel />
+      <div
+        className="resize-handle vertical project-resize-handle"
+        role="separator"
+        aria-label="Resize project sidebar"
+        aria-orientation="vertical"
+        onPointerDown={startHorizontalResize("projectPanelWidth")}
+      />
       <section className={isStoryCanvas ? "module-workspace" : "module-workspace expanded"}>
         {isStoryCanvas ? <StoryCanvas /> : isStoryModule ? <BeatBoard /> : <ModulePlaceholder module={activeModule} />}
       </section>
       {isStoryCanvas ? (
-        <section className="right-stack">
-          <InspectorPanel />
-          <WritersRoomPanel />
-          <AiDock />
-        </section>
+        <>
+          <div
+            className="resize-handle vertical right-resize-handle"
+            role="separator"
+            aria-label="Resize right dock"
+            aria-orientation="vertical"
+            onPointerDown={startHorizontalResize("rightPanelWidth")}
+          />
+          <section className="right-stack">
+            <InspectorPanel />
+            <div
+              className="resize-handle horizontal"
+              role="separator"
+              aria-label="Resize inspector panel"
+              aria-orientation="horizontal"
+              onPointerDown={startVerticalResize("inspectorHeight")}
+            />
+            <WritersRoomPanel />
+            <div
+              className="resize-handle horizontal"
+              role="separator"
+              aria-label="Resize writers room panel"
+              aria-orientation="horizontal"
+              onPointerDown={startVerticalResize("writersHeight")}
+            />
+            <AiDock />
+          </section>
+        </>
       ) : null}
       <nav className="bottom-tabs" aria-label="Workspace modes">
         <button className={isStoryCanvas ? "active" : ""} aria-pressed={isStoryCanvas} onClick={() => setStoryView("canvas")}>

@@ -11,6 +11,13 @@ import type {
 } from "../lib/schema.js";
 import { createSeedProject } from "../lib/seedProject.js";
 import type { WritersRoomError } from "../lib/electronApi.js";
+import {
+  clampStudioLayout,
+  defaultStudioLayout,
+  readStoredStudioLayout,
+  writeStoredStudioLayout,
+  type StudioLayout
+} from "./studioLayout.js";
 import type { StudioModuleId } from "./studioModules.js";
 import {
   addStoryBeat as addStoryBeatMutation,
@@ -36,6 +43,7 @@ type ProjectState = {
   project: ProjectDocument;
   activeModuleId: StudioModuleId;
   storyView: "canvas" | "beats";
+  layout: StudioLayout;
   selection: Selection;
   loadingAi: boolean;
   error: string | null;
@@ -43,6 +51,8 @@ type ProjectState = {
   setProject(project: ProjectDocument): void;
   setActiveModule(moduleId: StudioModuleId): void;
   setStoryView(storyView: "canvas" | "beats"): void;
+  updateLayout(patch: Partial<StudioLayout>): void;
+  resetLayout(): void;
   loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
@@ -90,6 +100,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   project: createSeedProject(),
   activeModuleId: "story",
   storyView: "canvas",
+  layout: readStoredStudioLayout(),
   selection: { type: "scene", id: "scene-opening" },
   loadingAi: false,
   error: null,
@@ -97,6 +108,15 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   setProject: (project) => set({ project, error: null }),
   setActiveModule: (activeModuleId) => set({ activeModuleId }),
   setStoryView: (storyView) => set({ storyView, activeModuleId: "story" }),
+  updateLayout: (patch) => {
+    const layout = clampStudioLayout(get().layout, patch);
+    writeStoredStudioLayout(layout);
+    set({ layout });
+  },
+  resetLayout: () => {
+    writeStoredStudioLayout(defaultStudioLayout);
+    set({ layout: defaultStudioLayout });
+  },
   loadDefaultProject: async () => {
     try {
       const project = await window.narrativeStudio.loadDefaultProject();
