@@ -8,6 +8,8 @@ const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
 
+app.setName("BB Studio");
+
 async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
