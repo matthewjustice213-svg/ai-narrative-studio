@@ -20,6 +20,7 @@ import { GroupBoxNode } from "./GroupBoxNode.js";
 import { SceneNode } from "./SceneNode.js";
 
 const colorOptions = ["#38d8ff", "#ff4fd8", "#ffb15c", "#7cff9b", "#9f7cff"];
+export const STORY_CANVAS_MIN_ZOOM = 0.1;
 
 type MenuTarget =
   | { type: "scene"; id: string }
@@ -182,6 +183,7 @@ export function StoryCanvas() {
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
+        minZoom={STORY_CANVAS_MIN_ZOOM}
         onInit={setReactFlowInstance}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
