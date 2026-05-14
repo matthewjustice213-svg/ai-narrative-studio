@@ -11,6 +11,15 @@ export function createSeedProject(): ProjectDocument {
       model: "gpt-5.4-mini",
       projectPath: null
     },
+    pitch: {
+      logline: "A fast-talking food truck owner tries to look successful while one tiny disaster exposes the whole act.",
+      synopsis:
+        "Fries keeps selling confidence until the night forces a choice between performing success and telling the truth.",
+      tone: "Anxious workplace comedy with cinematic pressure.",
+      audience: "Indie comedy viewers, YouTube creators, and short-form story fans.",
+      comps: ["The Bear", "Abbott Elementary", "Clerks"],
+      oneSheetNotes: "Lead with the trapped food truck visual, the receipt printer gag, and Fries' fear of being exposed."
+    },
     storyBeats: [
       {
         id: "beat-opening-pressure",

@@ -5,6 +5,7 @@ import type {
   GraphEdge,
   GroupBox,
   ProjectDocument,
+  ProjectPitch,
   Scene,
   StoryBeat,
   StoryBeatColumnId
@@ -53,6 +54,7 @@ type ProjectState = {
   setStoryView(storyView: "canvas" | "beats"): void;
   updateLayout(patch: Partial<StudioLayout>): void;
   resetLayout(): void;
+  updatePitch(patch: Partial<ProjectPitch>): Promise<void>;
   loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
@@ -121,6 +123,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   resetLayout: () => {
     writeStoredStudioLayout(defaultStudioLayout);
     set({ layout: defaultStudioLayout });
+  },
+  updatePitch: async (patch) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        pitch: {
+          ...project.pitch,
+          ...patch
+        }
+      });
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Pitch save failed.") });
+    }
   },
   loadDefaultProject: async () => {
     try {

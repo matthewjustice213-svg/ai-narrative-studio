@@ -31,10 +31,10 @@ describe("App", () => {
   it("switches from the story canvas to a placeholder module page", () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /BB Pitch/i }));
+    fireEvent.click(screen.getByRole("button", { name: /BB Animate/i }));
 
-    expect(screen.getByRole("button", { name: /BB Pitch/i }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("Pitch room")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /BB Animate/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Animation pipeline")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
@@ -77,6 +77,19 @@ describe("App", () => {
     expect(screen.getByLabelText("Lighting Notes")).toBeTruthy();
     expect(screen.getByLabelText("Sound Notes")).toBeTruthy();
     expect(screen.getByDisplayValue(/Locked-off wide/)).toBeTruthy();
+    expect(screen.queryByText("Scene Inspector")).toBeNull();
+  });
+
+  it("opens BB Pitch as a project pitch workspace", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /BB Pitch/i }));
+
+    expect(screen.getByRole("button", { name: /BB Pitch/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Pitch Room")).toBeTruthy();
+    expect(screen.getByLabelText("Logline")).toBeTruthy();
+    expect(screen.getByLabelText("Comparable Titles")).toBeTruthy();
+    expect(screen.getByText("One-Sheet Preview")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 

@@ -16,6 +16,7 @@ import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
 import { CharacterWorkspace } from "./features/characters/CharacterWorkspace.js";
 import { DirectorWorkspace } from "./features/director/DirectorWorkspace.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
+import { PitchWorkspace } from "./features/pitch/PitchWorkspace.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
 import { BeatBoard } from "./features/story/BeatBoard.js";
 import { WriterWorkspace } from "./features/writer/WriterWorkspace.js";
@@ -157,6 +158,8 @@ export default function App() {
           <CharacterWorkspace />
         ) : activeModule.id === "director" ? (
           <DirectorWorkspace />
+        ) : activeModule.id === "pitch" ? (
+          <PitchWorkspace />
         ) : (
           <ModulePlaceholder module={activeModule} />
         )}

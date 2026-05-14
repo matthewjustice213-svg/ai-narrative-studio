@@ -114,6 +114,24 @@ export const aiNoteSchema = z.object({
   createdAt: isoDatetimeSchema
 });
 
+export const projectPitchSchema = z.object({
+  logline: z.string().default(""),
+  synopsis: z.string().default(""),
+  tone: z.string().default(""),
+  audience: z.string().default(""),
+  comps: z.array(z.string()).default([]),
+  oneSheetNotes: z.string().default("")
+});
+
+const defaultProjectPitch = {
+  logline: "",
+  synopsis: "",
+  tone: "",
+  audience: "",
+  comps: [],
+  oneSheetNotes: ""
+};
+
 export const projectSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -123,6 +141,7 @@ export const projectSchema = z.object({
     model: z.string().min(1),
     projectPath: z.string().nullable()
   }),
+  pitch: projectPitchSchema.default(defaultProjectPitch),
   storyBeats: z.array(storyBeatSchema).default([]),
   groupBoxes: z.array(groupBoxSchema).default([]),
   scenes: z.array(sceneSchema),
@@ -270,4 +289,5 @@ export type GraphEdge = z.infer<typeof graphEdgeSchema>;
 export type Persona = z.infer<typeof personaSchema>;
 export type AiNote = z.infer<typeof aiNoteSchema>;
 export type ProjectDocument = z.infer<typeof projectSchema>;
+export type ProjectPitch = z.infer<typeof projectPitchSchema>;
 export type SoulFrontmatter = z.infer<typeof soulFrontmatterSchema>;

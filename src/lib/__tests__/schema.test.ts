@@ -21,6 +21,7 @@ describe("project schema", () => {
     const project = createSeedProject();
     const legacyProject = {
       ...project,
+      pitch: undefined,
       storyBeats: undefined,
       scenes: project.scenes.map((scene) => {
         const copy = withoutColor(scene);
@@ -39,6 +40,14 @@ describe("project schema", () => {
     const parsed = projectSchema.parse(legacyProject);
 
     expect(parsed.storyBeats).toEqual([]);
+    expect(parsed.pitch).toEqual({
+      logline: "",
+      synopsis: "",
+      tone: "",
+      audience: "",
+      comps: [],
+      oneSheetNotes: ""
+    });
     expect(parsed.groupBoxes).toEqual([]);
     expect(parsed.scenes[0].color).toBeNull();
     expect(parsed.scenes[0].cameraNotes).toBe("");
