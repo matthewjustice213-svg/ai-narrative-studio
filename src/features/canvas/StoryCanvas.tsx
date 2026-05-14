@@ -52,6 +52,7 @@ export function StoryCanvas() {
   const createGroupBox = useProjectStore((state) => state.createGroupBox);
   const createGroupBoxAround = useProjectStore((state) => state.createGroupBoxAround);
   const selectCharacterAvatarWithDialog = useProjectStore((state) => state.selectCharacterAvatarWithDialog);
+  const selectSceneStoryboardWithDialog = useProjectStore((state) => state.selectSceneStoryboardWithDialog);
   const replaceEdges = useProjectStore((state) => state.replaceEdges);
   const nodeTypes = useMemo<NodeTypes>(
     () => ({
@@ -212,6 +213,7 @@ export function StoryCanvas() {
           onDeleteNode={deleteNode}
           onDeleteGroupBox={deleteGroupBox}
           onImportCharacterAvatar={selectCharacterAvatarWithDialog}
+          onImportSceneStoryboard={selectSceneStoryboardWithDialog}
         />
       ) : null}
     </section>
@@ -229,6 +231,7 @@ type CanvasContextMenuProps = {
   onDeleteNode(type: "scene" | "character", id: string): Promise<void>;
   onDeleteGroupBox(id: string): Promise<void>;
   onImportCharacterAvatar(id: string): Promise<void>;
+  onImportSceneStoryboard(id: string): Promise<void>;
 };
 
 function CanvasContextMenu({
@@ -241,7 +244,8 @@ function CanvasContextMenu({
   onRenameGroup,
   onDeleteNode,
   onDeleteGroupBox,
-  onImportCharacterAvatar
+  onImportCharacterAvatar,
+  onImportSceneStoryboard
 }: CanvasContextMenuProps) {
   const run = (action: () => void | Promise<void>) => {
     void Promise.resolve(action()).finally(onClose);
@@ -306,6 +310,9 @@ function CanvasContextMenu({
       </div>
       {target.type === "character" ? (
         <button onClick={() => run(() => onImportCharacterAvatar(target.id))}>Import avatar</button>
+      ) : null}
+      {target.type === "scene" ? (
+        <button onClick={() => run(() => onImportSceneStoryboard(target.id))}>Import storyboard image</button>
       ) : null}
       <button onClick={() => run(() => onCreateGroupAround(target.type))}>
         {target.type === "scene" ? "Box story scenes" : "Box characters"}

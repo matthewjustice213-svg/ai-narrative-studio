@@ -29,6 +29,7 @@ const registeredChannels = [
   "project:open-dialog",
   "project:save",
   "scene:update",
+  "scene:select-storyboard-dialog",
   "character:update",
   "character:select-avatar-dialog",
   "edges:replace",
@@ -50,6 +51,8 @@ const scenePatchKeys = [
   "shotList",
   "lightingNotes",
   "soundNotes",
+  "storyboardImagePath",
+  "storyboardExpanded",
   "emotionalTone",
   "runtimeEstimate",
   "tags",
@@ -244,6 +247,30 @@ export function registerIpcHandlers() {
         characterId,
         pickPatch<Omit<Character, "id">>(patch, characterPatchKeys, "Invalid character patch.")
       )
+  );
+
+  ipcMain.handle(
+    "scene:select-storyboard-dialog",
+    async (_event, sceneId: string): Promise<ProjectDocument | null> => {
+      const repository = repo();
+      const result = await dialog.showOpenDialog({
+        title: "Choose scene storyboard image",
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Images",
+            extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"]
+          }
+        ]
+      });
+
+      if (result.canceled || result.filePaths.length === 0) return null;
+
+      return repository.updateScene(sceneId, {
+        storyboardImagePath: toRenderableAvatarUrl(result.filePaths[0]),
+        storyboardExpanded: true
+      });
+    }
   );
 
   ipcMain.handle(

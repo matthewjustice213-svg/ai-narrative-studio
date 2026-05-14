@@ -57,6 +57,8 @@ export const sceneSchema = z.object({
   shotList: z.string().default(""),
   lightingNotes: z.string().default(""),
   soundNotes: z.string().default(""),
+  storyboardImagePath: z.string().nullable().default(null),
+  storyboardExpanded: z.boolean().default(false),
   emotionalTone: z.string(),
   runtimeEstimate: z.number().min(0),
   tags: z.array(z.string()),

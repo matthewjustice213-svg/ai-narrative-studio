@@ -29,6 +29,8 @@ describe("project schema", () => {
         delete (copy as Partial<typeof scene>).shotList;
         delete (copy as Partial<typeof scene>).lightingNotes;
         delete (copy as Partial<typeof scene>).soundNotes;
+        delete (copy as Partial<typeof scene>).storyboardImagePath;
+        delete (copy as Partial<typeof scene>).storyboardExpanded;
         return copy;
       }),
       characters: project.characters.map(withoutColor)
@@ -41,6 +43,8 @@ describe("project schema", () => {
     expect(parsed.scenes[0].color).toBeNull();
     expect(parsed.scenes[0].cameraNotes).toBe("");
     expect(parsed.scenes[0].shotList).toBe("");
+    expect(parsed.scenes[0].storyboardImagePath).toBeNull();
+    expect(parsed.scenes[0].storyboardExpanded).toBe(false);
     expect(parsed.characters[0].color).toBeNull();
   });
 

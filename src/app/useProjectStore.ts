@@ -73,6 +73,7 @@ type ProjectState = {
   updateGroupBox(id: string, patch: Partial<Omit<GroupBox, "id">>): Promise<void>;
   selectPersonaAvatarWithDialog(personaId: string): Promise<void>;
   selectCharacterAvatarWithDialog(characterId: string): Promise<void>;
+  selectSceneStoryboardWithDialog(sceneId: string): Promise<void>;
   selectScene(id: string): void;
   selectCharacter(id: string): void;
   selectGroupBox(id: string): void;
@@ -187,6 +188,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       shotList: "",
       lightingNotes: "",
       soundNotes: "",
+      storyboardImagePath: null,
+      storyboardExpanded: false,
       emotionalTone: "undecided",
       runtimeEstimate: 1,
       tags: [],
@@ -403,6 +406,16 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       }
     } catch (error) {
       set({ error: errorMessage(error, "Character avatar update failed.") });
+    }
+  },
+  selectSceneStoryboardWithDialog: async (sceneId) => {
+    try {
+      const project = await window.narrativeStudio.selectSceneStoryboardWithDialog(sceneId);
+      if (project) {
+        set({ project, error: null });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Scene storyboard update failed.") });
     }
   },
   selectScene: (id) =>

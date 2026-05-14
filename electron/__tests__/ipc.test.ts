@@ -157,13 +157,14 @@ describe("ipc handlers", () => {
 
     registerIpcHandlers();
 
-    expect(ipcMain.handle).toHaveBeenCalledTimes(14);
+    expect(ipcMain.handle).toHaveBeenCalledTimes(15);
     expect(handlers.has("project:load-default")).toBe(true);
     expect(handlers.has("project:create-dialog")).toBe(true);
     expect(handlers.has("project:open-dialog")).toBe(true);
     expect(handlers.has("persona:import-dialog")).toBe(true);
     expect(handlers.has("persona:select-avatar-dialog")).toBe(true);
     expect(handlers.has("character:select-avatar-dialog")).toBe(true);
+    expect(handlers.has("scene:select-storyboard-dialog")).toBe(true);
     expect(handlers.has("project:create")).toBe(false);
     expect(handlers.has("project:open")).toBe(false);
     expect(handlers.has("persona:import")).toBe(false);
@@ -264,6 +265,26 @@ describe("ipc handlers", () => {
     });
     expect(updateCharacter).toHaveBeenCalledWith("char-fries", {
       avatarPath: `data:image/png;base64,${avatarPngBase64}`
+    });
+  });
+
+  it("selects a scene storyboard image through a main-process file dialog", async () => {
+    const storyboardFile = tempAvatarFile("opening.png");
+    showOpenDialog
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
+      .mockResolvedValueOnce({ canceled: false, filePaths: [storyboardFile] });
+    await invoke("project:open-dialog");
+
+    await invoke("scene:select-storyboard-dialog", "scene-opening");
+
+    expect(showOpenDialog).toHaveBeenLastCalledWith({
+      title: "Choose scene storyboard image",
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
+    });
+    expect(updateScene).toHaveBeenCalledWith("scene-opening", {
+      storyboardImagePath: `data:image/png;base64,${avatarPngBase64}`,
+      storyboardExpanded: true
     });
   });
 
