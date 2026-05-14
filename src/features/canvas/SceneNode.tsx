@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import type { Scene } from "../../lib/schema.js";
 
-export function SceneNode({ data, selected }: NodeProps<Scene>) {
+function SceneNodeView({ data, selected }: NodeProps<Scene>) {
   const color = data.color || "#ffb15c";
 
   return (
@@ -26,3 +26,9 @@ export function SceneNode({ data, selected }: NodeProps<Scene>) {
     </article>
   );
 }
+
+export function areSceneNodePropsEqual(previous: NodeProps<Scene>, next: NodeProps<Scene>) {
+  return previous.data === next.data && previous.selected === next.selected;
+}
+
+export const SceneNode = memo(SceneNodeView, areSceneNodePropsEqual);

@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import type { NodeProps } from "reactflow";
 import type { GroupBox } from "../../lib/schema.js";
 
-export function GroupBoxNode({ data, selected }: NodeProps<GroupBox>) {
+function GroupBoxNodeView({ data, selected }: NodeProps<GroupBox>) {
   return (
     <article
       className={`group-box-node ${selected ? "selected" : ""}`}
@@ -12,3 +12,9 @@ export function GroupBoxNode({ data, selected }: NodeProps<GroupBox>) {
     </article>
   );
 }
+
+export function areGroupBoxNodePropsEqual(previous: NodeProps<GroupBox>, next: NodeProps<GroupBox>) {
+  return previous.data === next.data && previous.selected === next.selected;
+}
+
+export const GroupBoxNode = memo(GroupBoxNodeView, areGroupBoxNodePropsEqual);

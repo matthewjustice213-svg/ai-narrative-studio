@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import type { Character } from "../../lib/schema.js";
 
-export function CharacterNode({ data, selected }: NodeProps<Character>) {
+function CharacterNodeView({ data, selected }: NodeProps<Character>) {
   const initials = data.name
     .split(" ")
     .map((part) => part[0])
@@ -27,3 +27,9 @@ export function CharacterNode({ data, selected }: NodeProps<Character>) {
     </article>
   );
 }
+
+export function areCharacterNodePropsEqual(previous: NodeProps<Character>, next: NodeProps<Character>) {
+  return previous.data === next.data && previous.selected === next.selected;
+}
+
+export const CharacterNode = memo(CharacterNodeView, areCharacterNodePropsEqual);

@@ -96,6 +96,10 @@ function createId(prefix: string) {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
 }
 
+function isSameSelection(current: Selection, next: NonNullable<Selection>) {
+  return current?.type === next.type && current.id === next.id;
+}
+
 export const useProjectStore = create<ProjectState>((set, get) => ({
   project: createSeedProject(),
   activeModuleId: "story",
@@ -401,10 +405,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ error: errorMessage(error, "Character avatar update failed.") });
     }
   },
-  selectScene: (id) => set({ selection: { type: "scene", id } }),
-  selectCharacter: (id) => set({ selection: { type: "character", id } }),
-  selectGroupBox: (id) => set({ selection: { type: "groupBox", id } }),
-  clearSelection: () => set({ selection: null }),
+  selectScene: (id) =>
+    set((state) => {
+      const selection: Selection = { type: "scene", id };
+      return isSameSelection(state.selection, selection) ? state : { selection };
+    }),
+  selectCharacter: (id) =>
+    set((state) => {
+      const selection: Selection = { type: "character", id };
+      return isSameSelection(state.selection, selection) ? state : { selection };
+    }),
+  selectGroupBox: (id) =>
+    set((state) => {
+      const selection: Selection = { type: "groupBox", id };
+      return isSameSelection(state.selection, selection) ? state : { selection };
+    }),
+  clearSelection: () => set((state) => (state.selection === null ? state : { selection: null })),
   updateScene: async (sceneId, patch) => {
     try {
       const project = await window.narrativeStudio.updateScene(sceneId, patch);
