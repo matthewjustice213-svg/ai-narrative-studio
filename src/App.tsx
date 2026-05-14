@@ -14,6 +14,7 @@ import { useProjectStore } from "./app/useProjectStore.js";
 import { AiDock } from "./features/ai-dock/AiDock.js";
 import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
 import { CharacterWorkspace } from "./features/characters/CharacterWorkspace.js";
+import { DirectorWorkspace } from "./features/director/DirectorWorkspace.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
 import { ProjectPanel } from "./features/project/ProjectPanel.js";
 import { BeatBoard } from "./features/story/BeatBoard.js";
@@ -154,6 +155,8 @@ export default function App() {
           <WriterWorkspace />
         ) : activeModule.id === "characters" ? (
           <CharacterWorkspace />
+        ) : activeModule.id === "director" ? (
+          <DirectorWorkspace />
         ) : (
           <ModulePlaceholder module={activeModule} />
         )}

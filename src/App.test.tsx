@@ -31,10 +31,10 @@ describe("App", () => {
   it("switches from the story canvas to a placeholder module page", () => {
     render(<App />);
 
-    fireEvent.click(screen.getByRole("button", { name: /BB Director/i }));
+    fireEvent.click(screen.getByRole("button", { name: /BB Pitch/i }));
 
-    expect(screen.getByRole("button", { name: /BB Director/i }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("Director board")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /BB Pitch/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Pitch room")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
@@ -62,6 +62,21 @@ describe("App", () => {
     expect(screen.getByDisplayValue("Owner-operator")).toBeTruthy();
     expect(screen.getByLabelText("Dialogue Style")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Choose Avatar" })).toBeTruthy();
+    expect(screen.queryByText("Scene Inspector")).toBeNull();
+  });
+
+  it("opens BB Director as a shot planning workspace", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /BB Director/i }));
+
+    expect(screen.getByRole("button", { name: /BB Director/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Shot Planner")).toBeTruthy();
+    expect(screen.getByLabelText("Camera Notes")).toBeTruthy();
+    expect(screen.getByLabelText("Shot List")).toBeTruthy();
+    expect(screen.getByLabelText("Lighting Notes")).toBeTruthy();
+    expect(screen.getByLabelText("Sound Notes")).toBeTruthy();
+    expect(screen.getByDisplayValue(/Locked-off wide/)).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 

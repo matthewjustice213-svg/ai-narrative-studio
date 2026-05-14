@@ -299,6 +299,27 @@ describe("ipc handlers", () => {
     });
   });
 
+  it("allows director planning fields in scene update payloads", async () => {
+    showOpenDialog.mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] });
+    await invoke("project:open-dialog");
+
+    await invoke("scene:update", "scene-opening", {
+      cameraNotes: "Locked-off wide until the printer screams.",
+      directorNotes: "Keep the panic contained in the frame.",
+      lightingNotes: "Cold fluorescents with a warm grill edge.",
+      shotList: "Wide master\nInsert receipt printer",
+      soundNotes: "Printer dominates the first beat."
+    });
+
+    expect(updateScene).toHaveBeenCalledWith("scene-opening", {
+      cameraNotes: "Locked-off wide until the printer screams.",
+      directorNotes: "Keep the panic contained in the frame.",
+      lightingNotes: "Cold fluorescents with a warm grill edge.",
+      shotList: "Wide master\nInsert receipt printer",
+      soundNotes: "Printer dominates the first beat."
+    });
+  });
+
   it("preserves main-owned project fields during full project saves", async () => {
     const originalNote = note("original");
     const currentProject: ProjectDocument = {

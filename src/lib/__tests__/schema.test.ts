@@ -22,7 +22,15 @@ describe("project schema", () => {
     const legacyProject = {
       ...project,
       storyBeats: undefined,
-      scenes: project.scenes.map(withoutColor),
+      scenes: project.scenes.map((scene) => {
+        const copy = withoutColor(scene);
+        delete (copy as Partial<typeof scene>).directorNotes;
+        delete (copy as Partial<typeof scene>).cameraNotes;
+        delete (copy as Partial<typeof scene>).shotList;
+        delete (copy as Partial<typeof scene>).lightingNotes;
+        delete (copy as Partial<typeof scene>).soundNotes;
+        return copy;
+      }),
       characters: project.characters.map(withoutColor)
     };
 
@@ -31,6 +39,8 @@ describe("project schema", () => {
     expect(parsed.storyBeats).toEqual([]);
     expect(parsed.groupBoxes).toEqual([]);
     expect(parsed.scenes[0].color).toBeNull();
+    expect(parsed.scenes[0].cameraNotes).toBe("");
+    expect(parsed.scenes[0].shotList).toBe("");
     expect(parsed.characters[0].color).toBeNull();
   });
 
