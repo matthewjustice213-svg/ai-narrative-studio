@@ -22,6 +22,8 @@ const addAiNotes = vi.fn();
 const runVisibleWriters = vi.fn();
 const generateOpenAiText = vi.fn();
 let tempDirs: string[] = [];
+const avatarPngBase64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=";
 
 vi.mock("electron", () => ({
   app: {
@@ -107,6 +109,14 @@ function tempSoulFile() {
   tempDirs.push(dir);
   const file = path.join(dir, "persona.md");
   writeFileSync(file, "# Imported", "utf-8");
+  return file;
+}
+
+function tempAvatarFile(fileName: string) {
+  const dir = mkdtempSync(path.join(tmpdir(), "ans-avatar-"));
+  tempDirs.push(dir);
+  const file = path.join(dir, fileName);
+  writeFileSync(file, Buffer.from(avatarPngBase64, "base64"));
   return file;
 }
 
@@ -220,9 +230,10 @@ describe("ipc handlers", () => {
   });
 
   it("selects a persona avatar through a main-process file dialog", async () => {
+    const avatarFile = tempAvatarFile("ruth.png");
     showOpenDialog
       .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
-      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/avatars/ruth.png"] });
+      .mockResolvedValueOnce({ canceled: false, filePaths: [avatarFile] });
     await invoke("project:open-dialog");
 
     await invoke("persona:select-avatar-dialog", "persona-ruth");
@@ -232,13 +243,16 @@ describe("ipc handlers", () => {
       properties: ["openFile"],
       filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
     });
-    expect(updatePersona).toHaveBeenCalledWith("persona-ruth", { avatarPath: "file:///C:/avatars/ruth.png" });
+    expect(updatePersona).toHaveBeenCalledWith("persona-ruth", {
+      avatarPath: `data:image/png;base64,${avatarPngBase64}`
+    });
   });
 
   it("selects a character avatar through a main-process file dialog", async () => {
+    const avatarFile = tempAvatarFile("fries.png");
     showOpenDialog
       .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
-      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/avatars/fries.png"] });
+      .mockResolvedValueOnce({ canceled: false, filePaths: [avatarFile] });
     await invoke("project:open-dialog");
 
     await invoke("character:select-avatar-dialog", "char-fries");
@@ -248,7 +262,9 @@ describe("ipc handlers", () => {
       properties: ["openFile"],
       filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
     });
-    expect(updateCharacter).toHaveBeenCalledWith("char-fries", { avatarPath: "file:///C:/avatars/fries.png" });
+    expect(updateCharacter).toHaveBeenCalledWith("char-fries", {
+      avatarPath: `data:image/png;base64,${avatarPngBase64}`
+    });
   });
 
   it("strips protected fields from persona update payloads", async () => {

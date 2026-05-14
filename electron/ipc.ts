@@ -2,7 +2,7 @@ import { app, dialog, ipcMain } from "electron";
 import keytar from "keytar";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import {
   projectSchema,
   type AiTask,
@@ -89,10 +89,29 @@ function activateProjectDir(projectDir: string) {
   return project;
 }
 
+function avatarMimeType(avatarPath: string) {
+  const extension = path.extname(avatarPath).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    ".gif": "image/gif",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".webp": "image/webp"
+  };
+
+  return mimeTypes[extension] ?? "application/octet-stream";
+}
+
 function toRenderableAvatarUrl(avatarPath: string | null) {
   if (!avatarPath) return null;
+  if (avatarPath.startsWith("data:image/")) return avatarPath;
+  if (avatarPath.startsWith("file://")) {
+    const filePath = fileURLToPath(avatarPath);
+    return `data:${avatarMimeType(filePath)};base64,${readFileSync(filePath).toString("base64")}`;
+  }
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(avatarPath)) return avatarPath;
-  return pathToFileURL(avatarPath).href;
+  return `data:${avatarMimeType(avatarPath)};base64,${readFileSync(avatarPath).toString("base64")}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
