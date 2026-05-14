@@ -20,6 +20,7 @@ export function createSeedProject(): ProjectDocument {
       comps: ["The Bear", "Abbott Elementary", "Clerks"],
       oneSheetNotes: "Lead with the trapped food truck visual, the receipt printer gag, and Fries' fear of being exposed."
     },
+    references: [],
     storyBeats: [
       {
         id: "beat-opening-pressure",

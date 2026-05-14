@@ -93,6 +93,19 @@ describe("App", () => {
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
+  it("opens BB Capture as a reference library workspace", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /BB Capture/i }));
+
+    expect(screen.getByRole("button", { name: /BB Capture/i }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Reference Library")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Import Image" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "New Note" })).toBeTruthy();
+    expect(screen.getByText("Capture Preview")).toBeTruthy();
+    expect(screen.queryByText("Scene Inspector")).toBeNull();
+  });
+
   it("lets BB Characters toggle linked scenes in the profile draft", () => {
     render(<App />);
 

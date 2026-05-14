@@ -157,7 +157,7 @@ describe("ipc handlers", () => {
 
     registerIpcHandlers();
 
-    expect(ipcMain.handle).toHaveBeenCalledTimes(15);
+    expect(ipcMain.handle).toHaveBeenCalledTimes(16);
     expect(handlers.has("project:load-default")).toBe(true);
     expect(handlers.has("project:create-dialog")).toBe(true);
     expect(handlers.has("project:open-dialog")).toBe(true);
@@ -165,6 +165,7 @@ describe("ipc handlers", () => {
     expect(handlers.has("persona:select-avatar-dialog")).toBe(true);
     expect(handlers.has("character:select-avatar-dialog")).toBe(true);
     expect(handlers.has("scene:select-storyboard-dialog")).toBe(true);
+    expect(handlers.has("reference:import-dialog")).toBe(true);
     expect(handlers.has("project:create")).toBe(false);
     expect(handlers.has("project:open")).toBe(false);
     expect(handlers.has("persona:import")).toBe(false);
@@ -285,6 +286,32 @@ describe("ipc handlers", () => {
     expect(updateScene).toHaveBeenCalledWith("scene-opening", {
       storyboardImagePath: `data:image/png;base64,${avatarPngBase64}`,
       storyboardExpanded: true
+    });
+  });
+
+  it("imports a reference image into the active project", async () => {
+    const referenceFile = tempAvatarFile("street.png");
+    const project = createSeedProject();
+    showOpenDialog
+      .mockResolvedValueOnce({ canceled: false, filePaths: ["C:/projects/existing"] })
+      .mockResolvedValueOnce({ canceled: false, filePaths: [referenceFile] });
+    loadProject.mockReturnValue(project);
+    await invoke("project:open-dialog");
+
+    await invoke("reference:import-dialog");
+
+    expect(showOpenDialog).toHaveBeenLastCalledWith({
+      title: "Import reference image",
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] }]
+    });
+    const savedProject = saveProject.mock.calls[0][0] as ProjectDocument;
+    expect(savedProject.references[0]).toMatchObject({
+      title: "street",
+      kind: "image",
+      imagePath: `data:image/png;base64,${avatarPngBase64}`,
+      notes: "",
+      tags: []
     });
   });
 

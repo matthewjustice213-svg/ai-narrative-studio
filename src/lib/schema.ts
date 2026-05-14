@@ -114,6 +114,16 @@ export const aiNoteSchema = z.object({
   createdAt: isoDatetimeSchema
 });
 
+export const referenceAssetSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  kind: z.enum(["image", "note"]).default("image"),
+  imagePath: z.string().nullable().default(null),
+  notes: z.string().default(""),
+  tags: z.array(z.string()).default([]),
+  createdAt: isoDatetimeSchema
+});
+
 export const projectPitchSchema = z.object({
   logline: z.string().default(""),
   synopsis: z.string().default(""),
@@ -142,6 +152,7 @@ export const projectSchema = z.object({
     projectPath: z.string().nullable()
   }),
   pitch: projectPitchSchema.default(defaultProjectPitch),
+  references: z.array(referenceAssetSchema).default([]),
   storyBeats: z.array(storyBeatSchema).default([]),
   groupBoxes: z.array(groupBoxSchema).default([]),
   scenes: z.array(sceneSchema),
@@ -178,6 +189,7 @@ export const projectSchema = z.object({
   addDuplicateIdIssues(project.characters, "characters");
   addDuplicateIdIssues(project.storyBeats, "storyBeats");
   addDuplicateIdIssues(project.groupBoxes, "groupBoxes");
+  addDuplicateIdIssues(project.references, "references");
   addDuplicateIdIssues(project.edges, "edges");
   addDuplicateIdIssues(project.personas, "personas");
   addDuplicateIdIssues(project.aiNotes, "aiNotes");
@@ -288,6 +300,7 @@ export type Character = z.infer<typeof characterSchema>;
 export type GraphEdge = z.infer<typeof graphEdgeSchema>;
 export type Persona = z.infer<typeof personaSchema>;
 export type AiNote = z.infer<typeof aiNoteSchema>;
+export type ReferenceAsset = z.infer<typeof referenceAssetSchema>;
 export type ProjectDocument = z.infer<typeof projectSchema>;
 export type ProjectPitch = z.infer<typeof projectPitchSchema>;
 export type SoulFrontmatter = z.infer<typeof soulFrontmatterSchema>;

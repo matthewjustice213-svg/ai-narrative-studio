@@ -26,6 +26,9 @@ const narrativeStudio: NarrativeStudioApi = {
   selectSceneStoryboardWithDialog(sceneId) {
     return ipcRenderer.invoke("scene:select-storyboard-dialog", sceneId);
   },
+  importReferenceWithDialog() {
+    return ipcRenderer.invoke("reference:import-dialog");
+  },
   replaceEdges(edges) {
     return ipcRenderer.invoke("edges:replace", edges);
   },

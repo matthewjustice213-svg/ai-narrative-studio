@@ -13,6 +13,7 @@ import { studioModules, type StudioModule, type StudioModuleId } from "./app/stu
 import { useProjectStore } from "./app/useProjectStore.js";
 import { AiDock } from "./features/ai-dock/AiDock.js";
 import { StoryCanvas } from "./features/canvas/StoryCanvas.js";
+import { CaptureWorkspace } from "./features/capture/CaptureWorkspace.js";
 import { CharacterWorkspace } from "./features/characters/CharacterWorkspace.js";
 import { DirectorWorkspace } from "./features/director/DirectorWorkspace.js";
 import { InspectorPanel } from "./features/inspector/InspectorPanel.js";
@@ -160,6 +161,8 @@ export default function App() {
           <DirectorWorkspace />
         ) : activeModule.id === "pitch" ? (
           <PitchWorkspace />
+        ) : activeModule.id === "capture" ? (
+          <CaptureWorkspace />
         ) : (
           <ModulePlaceholder module={activeModule} />
         )}

@@ -22,6 +22,7 @@ describe("project schema", () => {
     const legacyProject = {
       ...project,
       pitch: undefined,
+      references: undefined,
       storyBeats: undefined,
       scenes: project.scenes.map((scene) => {
         const copy = withoutColor(scene);
@@ -40,6 +41,7 @@ describe("project schema", () => {
     const parsed = projectSchema.parse(legacyProject);
 
     expect(parsed.storyBeats).toEqual([]);
+    expect(parsed.references).toEqual([]);
     expect(parsed.pitch).toEqual({
       logline: "",
       synopsis: "",

@@ -25,6 +25,7 @@ export type NarrativeStudioApi = {
   updateCharacter(characterId: string, patch: Partial<Omit<Character, "id">>): Promise<ProjectDocument>;
   selectCharacterAvatarWithDialog(characterId: string): Promise<ProjectDocument | null>;
   selectSceneStoryboardWithDialog(sceneId: string): Promise<ProjectDocument | null>;
+  importReferenceWithDialog(): Promise<ProjectDocument | null>;
   replaceEdges(edges: GraphEdge[]): Promise<ProjectDocument>;
   importSoulWithDialog(): Promise<ProjectDocument | null>;
   selectPersonaAvatarWithDialog(personaId: string): Promise<ProjectDocument | null>;

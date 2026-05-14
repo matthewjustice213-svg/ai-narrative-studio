@@ -6,6 +6,7 @@ import type {
   GroupBox,
   ProjectDocument,
   ProjectPitch,
+  ReferenceAsset,
   Scene,
   StoryBeat,
   StoryBeatColumnId
@@ -55,6 +56,10 @@ type ProjectState = {
   updateLayout(patch: Partial<StudioLayout>): void;
   resetLayout(): void;
   updatePitch(patch: Partial<ProjectPitch>): Promise<void>;
+  importReferenceWithDialog(): Promise<void>;
+  createReferenceNote(): Promise<void>;
+  updateReference(referenceId: string, patch: Partial<Omit<ReferenceAsset, "id" | "createdAt">>): Promise<void>;
+  deleteReference(referenceId: string): Promise<void>;
   loadDefaultProject(): Promise<void>;
   createProjectWithDialog(): Promise<void>;
   openProjectWithDialog(): Promise<void>;
@@ -138,6 +143,66 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ project: saved, error: null });
     } catch (error) {
       set({ error: errorMessage(error, "Pitch save failed.") });
+    }
+  },
+  importReferenceWithDialog: async () => {
+    try {
+      const project = await window.narrativeStudio.importReferenceWithDialog();
+      if (project) {
+        set({ project, error: null });
+      }
+    } catch (error) {
+      set({ error: errorMessage(error, "Reference import failed.") });
+    }
+  },
+  createReferenceNote: async () => {
+    const project = get().project;
+    const reference: ReferenceAsset = {
+      id: createId("reference"),
+      title: "New Reference Note",
+      kind: "note",
+      imagePath: null,
+      notes: "",
+      tags: [],
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        references: [reference, ...project.references]
+      });
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Reference note creation failed.") });
+    }
+  },
+  updateReference: async (referenceId, patch) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        references: project.references.map((reference) =>
+          reference.id === referenceId ? { ...reference, ...patch } : reference
+        )
+      });
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Reference update failed.") });
+    }
+  },
+  deleteReference: async (referenceId) => {
+    const project = get().project;
+
+    try {
+      const saved = await window.narrativeStudio.saveProject({
+        ...project,
+        references: project.references.filter((reference) => reference.id !== referenceId)
+      });
+      set({ project: saved, error: null });
+    } catch (error) {
+      set({ error: errorMessage(error, "Reference deletion failed.") });
     }
   },
   loadDefaultProject: async () => {

@@ -1,5 +1,6 @@
 import { app, dialog, ipcMain } from "electron";
 import keytar from "keytar";
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,6 +31,7 @@ const registeredChannels = [
   "project:save",
   "scene:update",
   "scene:select-storyboard-dialog",
+  "reference:import-dialog",
   "character:update",
   "character:select-avatar-dialog",
   "edges:replace",
@@ -120,6 +122,10 @@ function toRenderableAvatarUrl(avatarPath: string | null) {
   }
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(avatarPath)) return avatarPath;
   return `data:${avatarMimeType(avatarPath)};base64,${readFileSync(avatarPath).toString("base64")}`;
+}
+
+function createReferenceId() {
+  return `reference-${randomUUID()}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -272,6 +278,42 @@ export function registerIpcHandlers() {
       });
     }
   );
+
+  ipcMain.handle("reference:import-dialog", async (): Promise<ProjectDocument | null> => {
+    const repository = repo();
+    const result = await dialog.showOpenDialog({
+      title: "Import reference image",
+      properties: ["openFile"],
+      filters: [
+        {
+          name: "Images",
+          extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"]
+        }
+      ]
+    });
+
+    if (result.canceled || result.filePaths.length === 0) return null;
+
+    const imagePath = result.filePaths[0];
+    const project = repository.loadProject();
+    repository.saveProject({
+      ...project,
+      references: [
+        {
+          id: createReferenceId(),
+          title: path.basename(imagePath, path.extname(imagePath)),
+          kind: "image",
+          imagePath: toRenderableAvatarUrl(imagePath),
+          notes: "",
+          tags: [],
+          createdAt: new Date().toISOString()
+        },
+        ...project.references
+      ]
+    });
+
+    return repository.loadProject();
+  });
 
   ipcMain.handle(
     "character:select-avatar-dialog",
