@@ -29,6 +29,10 @@ export function AnimateWorkspace() {
 
     return project.scenes[0] ?? null;
   }, [project.scenes, selection]);
+  const linkedReferences = useMemo(
+    () => (activeScene ? project.references.filter((reference) => reference.linkedSceneIds.includes(activeScene.id)) : []),
+    [activeScene, project.references]
+  );
   const [draft, setDraft] = useState<AnimateDraft | null>(null);
 
   useEffect(() => {
@@ -154,6 +158,22 @@ export function AnimateWorkspace() {
             <section>
               <h3>Animation Beat</h3>
               <p>{draft.animationAction || "Add the physical action, camera move, or key pose idea."}</p>
+            </section>
+            <section>
+              <h3>Scene References</h3>
+              {linkedReferences.length > 0 ? (
+                <div className="scene-reference-list">
+                  {linkedReferences.map((reference) => (
+                    <article key={reference.id} className="scene-reference-card">
+                      {reference.imagePath ? <img src={reference.imagePath} alt={reference.title} /> : null}
+                      <strong>{reference.title}</strong>
+                      <p>{reference.notes || reference.tags.join(", ") || "No reference notes yet."}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p>No linked references yet.</p>
+              )}
             </section>
           </aside>
         </>

@@ -20,7 +20,18 @@ export function createSeedProject(): ProjectDocument {
       comps: ["The Bear", "Abbott Elementary", "Clerks"],
       oneSheetNotes: "Lead with the trapped food truck visual, the receipt printer gag, and Fries' fear of being exposed."
     },
-    references: [],
+    references: [
+      {
+        id: "ref-food-truck-pressure",
+        title: "Food truck pressure reference",
+        kind: "note",
+        imagePath: null,
+        notes: "Tight service-window blocking, cluttered counter space, and visible pressure around the printer.",
+        tags: ["blocking", "pressure"],
+        linkedSceneIds: ["scene-opening"],
+        createdAt: now
+      }
+    ],
     storyBeats: [
       {
         id: "beat-opening-pressure",

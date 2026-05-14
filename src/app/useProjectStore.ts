@@ -164,6 +164,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       imagePath: null,
       notes: "",
       tags: [],
+      linkedSceneIds: [],
       createdAt: new Date().toISOString()
     };
 

@@ -31,6 +31,10 @@ export function deleteGraphNode(project: ProjectDocument, target: GraphNodeTarge
         ...character,
         linkedSceneIds: character.linkedSceneIds.filter((sceneId) => sceneId !== target.id)
       })),
+      references: project.references.map((reference) => ({
+        ...reference,
+        linkedSceneIds: reference.linkedSceneIds.filter((sceneId) => sceneId !== target.id)
+      })),
       edges: project.edges.filter((edge) => edge.source !== target.id && edge.target !== target.id),
       aiNotes: project.aiNotes.filter((note) => note.sceneId !== target.id)
     };

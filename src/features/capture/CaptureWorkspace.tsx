@@ -23,7 +23,8 @@ export function CaptureWorkspace() {
   const [draft, setDraft] = useState({
     title: activeReference?.title ?? "",
     notes: activeReference?.notes ?? "",
-    tagsText: activeReference?.tags.join(", ") ?? ""
+    tagsText: activeReference?.tags.join(", ") ?? "",
+    linkedSceneIds: activeReference?.linkedSceneIds ?? []
   });
 
   useEffect(() => {
@@ -36,7 +37,8 @@ export function CaptureWorkspace() {
     setDraft({
       title: activeReference?.title ?? "",
       notes: activeReference?.notes ?? "",
-      tagsText: activeReference?.tags.join(", ") ?? ""
+      tagsText: activeReference?.tags.join(", ") ?? "",
+      linkedSceneIds: activeReference?.linkedSceneIds ?? []
     });
   }, [activeReference]);
 
@@ -45,8 +47,21 @@ export function CaptureWorkspace() {
     void updateReference(activeReference.id, {
       title: draft.title.trim() || "Untitled Reference",
       notes: draft.notes,
-      tags: parseTags(draft.tagsText)
+      tags: parseTags(draft.tagsText),
+      linkedSceneIds: draft.linkedSceneIds
     });
+  };
+
+  const updateSceneLink = (sceneId: string, linked: boolean) => {
+    if (!activeReference) return;
+
+    const linkedSceneIds = linked
+      ? Array.from(new Set([...draft.linkedSceneIds, sceneId]))
+      : draft.linkedSceneIds.filter((id) => id !== sceneId);
+    const nextDraft = { ...draft, linkedSceneIds };
+
+    setDraft(nextDraft);
+    void updateReference(activeReference.id, { linkedSceneIds });
   };
 
   return (
@@ -125,6 +140,19 @@ export function CaptureWorkspace() {
                 onBlur={saveDraft}
               />
             </label>
+            <section className="capture-scene-links full">
+              <h3>Linked Scenes</h3>
+              {project.scenes.map((scene) => (
+                <label key={scene.id} className="scene-link-row">
+                  <span>{scene.title}</span>
+                  <input
+                    type="checkbox"
+                    checked={draft.linkedSceneIds.includes(scene.id)}
+                    onChange={(event) => updateSceneLink(scene.id, event.target.checked)}
+                  />
+                </label>
+              ))}
+            </section>
           </div>
         ) : (
           <div className="capture-empty">

@@ -89,6 +89,48 @@ describe("project schema", () => {
     expect(parsed.storyBeats[0].tags).toEqual(["setup"]);
   });
 
+  it("backfills linked scene defaults on older reference assets", () => {
+    const project = createSeedProject();
+    const legacyReference = {
+      id: "ref-food-truck",
+      title: "Food truck pressure reference",
+      kind: "note",
+      imagePath: null,
+      notes: "Keep the counter tight and cluttered.",
+      tags: ["blocking"],
+      createdAt: new Date().toISOString()
+    };
+
+    const parsed = projectSchema.parse({
+      ...project,
+      references: [legacyReference]
+    });
+
+    expect(parsed.references[0].linkedSceneIds).toEqual([]);
+  });
+
+  it("rejects a reference linked to a missing scene", () => {
+    const project = createSeedProject();
+
+    expect(() =>
+      projectSchema.parse({
+        ...project,
+        references: [
+          {
+            id: "ref-missing-scene",
+            title: "Missing scene reference",
+            kind: "note",
+            imagePath: null,
+            notes: "",
+            tags: [],
+            linkedSceneIds: ["scene-missing"],
+            createdAt: new Date().toISOString()
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
   it("accepts labeled group boxes for corralling story nodes", () => {
     const project = createSeedProject();
 

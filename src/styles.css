@@ -794,6 +794,7 @@ button {
 .scene-link-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   border: 1px solid #252f3f;
   border-radius: 6px;
@@ -803,6 +804,7 @@ button {
 }
 
 .scene-link-row input {
+  flex: 0 0 auto;
   accent-color: #ff4fd8;
 }
 
@@ -970,6 +972,33 @@ button {
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.scene-reference-list {
+  display: grid;
+  gap: 8px;
+}
+
+.scene-reference-card {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.scene-reference-card img {
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  border: 1px solid #252f3f;
+  border-radius: 6px;
+  background: #090d14;
+}
+
+.scene-reference-card strong {
+  color: #e7edf7;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .director-empty {
@@ -1314,6 +1343,19 @@ button {
 
 .capture-field.full {
   grid-column: 1 / -1;
+}
+
+.capture-scene-links {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.capture-scene-links h3 {
+  margin: 0;
+  color: #d8e4f2;
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
 .capture-field input,

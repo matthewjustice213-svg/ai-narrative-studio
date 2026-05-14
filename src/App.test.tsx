@@ -39,6 +39,8 @@ describe("App", () => {
     expect(screen.getByLabelText("Action / Motion Notes")).toBeTruthy();
     expect(screen.getByLabelText("Timing Notes")).toBeTruthy();
     expect(screen.getByText("Storyboard Preview")).toBeTruthy();
+    expect(screen.getByText("Scene References")).toBeTruthy();
+    expect(screen.getByText("Food truck pressure reference")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
@@ -81,6 +83,8 @@ describe("App", () => {
     expect(screen.getByLabelText("Lighting Notes")).toBeTruthy();
     expect(screen.getByLabelText("Sound Notes")).toBeTruthy();
     expect(screen.getByDisplayValue(/Locked-off wide/)).toBeTruthy();
+    expect(screen.getByText("Scene References")).toBeTruthy();
+    expect(screen.getByText("Food truck pressure reference")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
@@ -107,6 +111,8 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Import Image" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "New Note" })).toBeTruthy();
     expect(screen.getByText("Capture Preview")).toBeTruthy();
+    expect(screen.getByText("Linked Scenes")).toBeTruthy();
+    expect((screen.getByRole("checkbox", { name: "Opening Image" }) as HTMLInputElement).checked).toBe(true);
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 

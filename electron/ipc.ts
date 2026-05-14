@@ -310,6 +310,7 @@ export function registerIpcHandlers() {
           imagePath: toRenderableAvatarUrl(imagePath),
           notes: "",
           tags: [],
+          linkedSceneIds: [],
           createdAt: new Date().toISOString()
         },
         ...project.references

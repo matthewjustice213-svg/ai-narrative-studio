@@ -21,6 +21,10 @@ export function DirectorWorkspace() {
 
     return project.scenes[0] ?? null;
   }, [project.scenes, selection]);
+  const linkedReferences = useMemo(
+    () => (activeScene ? project.references.filter((reference) => reference.linkedSceneIds.includes(activeScene.id)) : []),
+    [activeScene, project.references]
+  );
   const [draft, setDraft] = useState<DirectorDraft | null>(null);
 
   useEffect(() => {
@@ -138,6 +142,22 @@ export function DirectorWorkspace() {
             <section>
               <h3>Tags</h3>
               <p>{activeScene.tags.length > 0 ? activeScene.tags.join(", ") : "No tags yet."}</p>
+            </section>
+            <section>
+              <h3>Scene References</h3>
+              {linkedReferences.length > 0 ? (
+                <div className="scene-reference-list">
+                  {linkedReferences.map((reference) => (
+                    <article key={reference.id} className="scene-reference-card">
+                      {reference.imagePath ? <img src={reference.imagePath} alt={reference.title} /> : null}
+                      <strong>{reference.title}</strong>
+                      <p>{reference.notes || reference.tags.join(", ") || "No reference notes yet."}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p>No linked references yet.</p>
+              )}
             </section>
           </aside>
         </>

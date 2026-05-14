@@ -125,6 +125,7 @@ export const referenceAssetSchema = z.object({
   imagePath: z.string().nullable().default(null),
   notes: z.string().default(""),
   tags: z.array(z.string()).default([]),
+  linkedSceneIds: z.array(z.string()).default([]),
   createdAt: isoDatetimeSchema
 });
 
@@ -256,6 +257,19 @@ export const projectSchema = z.object({
         addIssue(`Character linkedSceneId does not reference a scene: ${sceneId}`, [
           "characters",
           characterIndex,
+          "linkedSceneIds",
+          sceneIndex
+        ]);
+      }
+    });
+  });
+
+  project.references.forEach((reference, referenceIndex) => {
+    reference.linkedSceneIds.forEach((sceneId, sceneIndex) => {
+      if (!sceneIds.has(sceneId)) {
+        addIssue(`Reference linkedSceneId does not reference a scene: ${sceneId}`, [
+          "references",
+          referenceIndex,
           "linkedSceneIds",
           sceneIndex
         ]);

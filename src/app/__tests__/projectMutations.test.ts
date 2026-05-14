@@ -32,6 +32,18 @@ describe("project mutations", () => {
         ...character,
         linkedSceneIds: ["scene-opening"]
       })),
+      references: [
+        {
+          id: "ref-opening",
+          title: "Opening reference",
+          kind: "note" as const,
+          imagePath: null,
+          notes: "",
+          tags: [],
+          linkedSceneIds: ["scene-opening", "scene-turn"],
+          createdAt: "2026-05-09T00:00:00.000Z"
+        }
+      ],
       personas: [
         {
           id: "persona-reader",
@@ -54,6 +66,7 @@ describe("project mutations", () => {
     expect(result.edges.some((edge) => edge.source === "scene-opening" || edge.target === "scene-opening")).toBe(false);
     expect(result.aiNotes).toEqual([]);
     expect(result.characters[0].linkedSceneIds).toEqual([]);
+    expect(result.references[0].linkedSceneIds).toEqual(["scene-turn"]);
   });
 
   it("deletes a character and removes dependent edges and scene links", () => {
