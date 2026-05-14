@@ -28,13 +28,17 @@ describe("App", () => {
     expect(screen.getByText("Scene Inspector")).toBeTruthy();
   });
 
-  it("switches from the story canvas to a placeholder module page", () => {
+  it("opens BB Animate as an animatic planning workspace", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: /BB Animate/i }));
 
     expect(screen.getByRole("button", { name: /BB Animate/i }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("Animation pipeline")).toBeTruthy();
+    expect(screen.getByText("Animatic Board")).toBeTruthy();
+    expect(screen.getByLabelText("Animation Status")).toBeTruthy();
+    expect(screen.getByLabelText("Action / Motion Notes")).toBeTruthy();
+    expect(screen.getByLabelText("Timing Notes")).toBeTruthy();
+    expect(screen.getByText("Storyboard Preview")).toBeTruthy();
     expect(screen.queryByText("Scene Inspector")).toBeNull();
   });
 
